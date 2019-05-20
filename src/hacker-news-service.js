@@ -4,7 +4,7 @@ angular.module("hackerNewsSearchApp")
     this.items = {};
     let self = this;
     function getItemUrl (itemNum) {
-        return `https://hacker-news.firebaseio.com/v0/item/${itemNum}.json?print=pretty`;
+        return `https://shaky-hacker-news.herokuapp.com/item/${itemNum}`;
     }
     self.getStory = function (itemNum) {
         let url = getItemUrl(itemNum);
@@ -28,7 +28,7 @@ angular.module("hackerNewsSearchApp")
         })
         return deferred.promise;
     }
-    self.topStoriesUrl = "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty";
+    self.topStoriesUrl = "https://shaky-hacker-news.herokuapp.com/topstories";
     
     self.getTopStoriesIndex = function() {
         let deferred = $q.defer();

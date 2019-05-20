@@ -2,10 +2,7 @@
 module.exports.template = `
     <div>
         <p class = "alert alert-info loading" ng-show = "loading">loading</p>
-        <p class="info">
-            Upon loading, this app queries the Hacker News api to get the current 
-            top stories, in order.  You can use the search bar to filter the list.
-        </p>
+        <h2>Hacker News Top Stories</h2>
         <form name = "searchForm">
             <label for "searchField">Enter Search Phrase</label>
             <input 
@@ -16,9 +13,12 @@ module.exports.template = `
                 class = "form-control"
             >
         </form>
-        <h2>Hacker News Top Stories</h2>
+        
         <ul class="list-group">
             <li class="list-group-item" ng-repeat = "itemNum in topStoriesIndex" ng-show = "items[itemNum].data.title.toLowerCase().includes(searchText.toLowerCase())">
+                    <p>
+                        Placeholder for article #{{itemNum}}.  Loading: {{items[itemNum].loading}}. Error: {{items[itemNum].error}}
+                    </p>
                     <p class = "story" ng-show = "items[itemNum].data.url">
                         <a target="_blank" href = "{{items[itemNum].data.url}}">{{ items[itemNum].data.title }}</a>
                     </p>
@@ -102,7 +102,7 @@ angular.module("hackerNewsSearchApp")
     this.items = {};
     let self = this;
     function getItemUrl (itemNum) {
-        return `https://hacker-news.firebaseio.com/v0/item/${itemNum}.json?print=pretty`;
+        return `https://shaky-hacker-news.herokuapp.com/item/${itemNum}`;
     }
     self.getStory = function (itemNum) {
         let url = getItemUrl(itemNum);
@@ -126,7 +126,7 @@ angular.module("hackerNewsSearchApp")
         })
         return deferred.promise;
     }
-    self.topStoriesUrl = "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty";
+    self.topStoriesUrl = "https://shaky-hacker-news.herokuapp.com/topstories";
     
     self.getTopStoriesIndex = function() {
         let deferred = $q.defer();
