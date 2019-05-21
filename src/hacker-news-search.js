@@ -1,6 +1,5 @@
 let template = require("./hacker-news-search-template").template;
 
-
 angular.module("hackerNewsSearchApp",[])
 .directive("hackerNewsSearch", function() {
     return {
@@ -11,7 +10,7 @@ angular.module("hackerNewsSearchApp",[])
             $scope.topStoriesIndex = [];
             $scope.items = {};
             $scope.searchText = "";
-
+            $scope.serverError = false;
             $scope.getItem = function(id) {
                 $scope.items[id] = {};
                 $scope.items[id].loading = true;
@@ -27,24 +26,29 @@ angular.module("hackerNewsSearchApp",[])
                         }
                     });
             }
-
             hackerNewsService.getTopStoriesIndex()
             .then((response)=>{
-                let promises = [];
-                $scope.topStoriesIndex = response.topStoriesIndex;
-                $scope.topStoriesIndex.forEach((id) => {
-                    promises.push(
-                        $scope.getItem(id)
-                    );
-                });
-                $q.all(promises)
-                .then(()=>{
+                if (response.status == "SUCCESS") {
+                    let promises = [];
+                    $scope.topStoriesIndex = response.data.slice(0,50);
+                    $scope.topStoriesIndex.forEach((id) => {
+                        promises.push(
+                            $scope.getItem(id)
+                        );
+                    });
+                    $q.all(promises)
+                    .then(()=>{
+                        $scope.loading = false;
+                    })
+                } else {
+                    $scope.serverError = true;
                     $scope.loading = false;
-                })
+                }
             })
 
         }]
     }
 })
 
+// require("./durable-http");
 require("./hacker-news-service");

@@ -1,7 +1,47 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+angular.module("hackerNewsSearchApp")
+.service("durableHttpService", ["$http", "$q", function($http, $q) {
+    let numTries = 3;
+    this.config = function(configObject) {
+        numTries = configObject.numTries;
+    }
+
+    this.get = function(url) {
+        let deferred = $q.defer();
+        let iteration = 0
+        let attempt = function() {
+            if (iteration >= numTries) {
+                deferred.resolve({
+                    status: "FAIL"
+                });
+            } else {
+                iteration++;
+                $http.get(url)
+                .then((response)=>{
+                    if (response.status == 200) {
+                        deferred.resolve({
+                            status: "SUCCESS",
+                            data : response.data
+                        })
+                    } else {
+                        attempt();
+                    }
+                })
+                .catch(() =>{
+                    attempt();
+                })
+            }
+        }
+        attempt();
+        return deferred.promise;
+        
+    }
+}])
+},{}],2:[function(require,module,exports){
 module.exports.template = `
     <div>
         <p class = "alert alert-info loading" ng-show = "loading">loading</p>
+        <p class = "alert alert-info error" ng-show = "serverError" ng-cloak>Could not reach the server.  Please try again later.</p>
         <h2>Hacker News Top Stories</h2>
         <form name = "searchForm">
             <label for "searchField">Enter Search Phrase</label>
@@ -10,15 +50,12 @@ module.exports.template = `
                 aria-label="search text"
                 ng-model = "searchText"
                 name = "searchField"
-                class = "form-control"
+                class = "form-control main-search"
             >
         </form>
         
         <ul class="list-group">
-            <li class="list-group-item" ng-repeat = "itemNum in topStoriesIndex" ng-show = "items[itemNum].data.title.toLowerCase().includes(searchText.toLowerCase())">
-                    <p>
-                        Placeholder for article #{{itemNum}}.  Loading: {{items[itemNum].loading}}. Error: {{items[itemNum].error}}
-                    </p>
+            <li class="list-group-item" ng-repeat = "itemNum in topStoriesIndex" ng-show = "items[itemNum].loading || items[itemNum].error || items[itemNum].data.title.toLowerCase().includes(searchText.toLowerCase())">
                     <p class = "story" ng-show = "items[itemNum].data.url">
                         <a target="_blank" href = "{{items[itemNum].data.url}}">{{ items[itemNum].data.title }}</a>
                     </p>
@@ -44,9 +81,8 @@ module.exports.template = `
         </ul>
     </div>
 `
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 let template = require("./hacker-news-search-template").template;
-
 
 angular.module("hackerNewsSearchApp",[])
 .directive("hackerNewsSearch", function() {
@@ -58,7 +94,7 @@ angular.module("hackerNewsSearchApp",[])
             $scope.topStoriesIndex = [];
             $scope.items = {};
             $scope.searchText = "";
-
+            $scope.serverError = false;
             $scope.getItem = function(id) {
                 $scope.items[id] = {};
                 $scope.items[id].loading = true;
@@ -74,30 +110,37 @@ angular.module("hackerNewsSearchApp",[])
                         }
                     });
             }
-
             hackerNewsService.getTopStoriesIndex()
             .then((response)=>{
-                let promises = [];
-                $scope.topStoriesIndex = response.topStoriesIndex;
-                $scope.topStoriesIndex.forEach((id) => {
-                    promises.push(
-                        $scope.getItem(id)
-                    );
-                });
-                $q.all(promises)
-                .then(()=>{
+                if (response.status == "SUCCESS") {
+                    let promises = [];
+                    $scope.topStoriesIndex = response.data.slice(0,50);
+                    $scope.topStoriesIndex.forEach((id) => {
+                        promises.push(
+                            $scope.getItem(id)
+                        );
+                    });
+                    $q.all(promises)
+                    .then(()=>{
+                        $scope.loading = false;
+                    })
+                } else {
+                    $scope.serverError = true;
                     $scope.loading = false;
-                })
+                }
             })
 
         }]
     }
 })
 
+// require("./durable-http");
 require("./hacker-news-service");
-},{"./hacker-news-search-template":1,"./hacker-news-service":3}],3:[function(require,module,exports){
+},{"./hacker-news-search-template":2,"./hacker-news-service":4}],4:[function(require,module,exports){
+require("./durable-http");
+
 angular.module("hackerNewsSearchApp")
-.service("hackerNewsService", ["$http", "$q", function($http, $q) {
+.service("hackerNewsService", ["$http", "$q", "durableHttpService", function($http, $q, durableHttpService) {
     this.itemNumbers = [];
     this.items = {};
     let self = this;
@@ -106,52 +149,14 @@ angular.module("hackerNewsSearchApp")
     }
     self.getStory = function (itemNum) {
         let url = getItemUrl(itemNum);
-        let deferred = $q.defer();
-        $http.get(url)
-        .then(response => {
-            if (response.status == 200) {
-                deferred.resolve({
-                    status : "SUCCESS",
-                    data : response.data
-                })
-            } else {
-                deferred.resolve({
-                    status : "FAIL",
-                })
-            }
-        }).catch(()=>{
-            deferred.resolve({
-                status : "FAIL",
-            })
-        })
-        return deferred.promise;
+        return durableHttpService.get(url);
     }
     self.topStoriesUrl = "https://shaky-hacker-news.herokuapp.com/topstories";
     
     self.getTopStoriesIndex = function() {
-        let deferred = $q.defer();
-        $http.get(self.topStoriesUrl)
-        .then(function (response) {
-            if (response.status == 200) {
-                deferred.resolve({
-                    status : "SUCCESS",
-                    topStoriesIndex : response.data.slice(0, 100)
-                })
-            } else {
-                deferred.resolve({
-                    status : "FAIL",
-                    topStoriesIndex : []
-                })
-            }
-        })
-        .catch(function() {
-            deferred.resolve({
-                status : "FAIL",
-                topStoriesIndex : []
-            })
-        })
-        return deferred.promise;
+        return  durableHttpService.get(self.topStoriesUrl);
     }
 
 }]);
-},{}]},{},[2]);
+
+},{"./durable-http":1}]},{},[3]);

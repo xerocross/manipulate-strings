@@ -1,6 +1,7 @@
 module.exports.template = `
     <div>
         <p class = "alert alert-info loading" ng-show = "loading">loading</p>
+        <p class = "alert alert-info error" ng-show = "serverError" ng-cloak>Could not reach the server.  Please try again later.</p>
         <h2>Hacker News Top Stories</h2>
         <form name = "searchForm">
             <label for "searchField">Enter Search Phrase</label>
@@ -9,7 +10,7 @@ module.exports.template = `
                 aria-label="search text"
                 ng-model = "searchText"
                 name = "searchField"
-                class = "form-control"
+                class = "form-control main-search"
             >
         </form>
         
