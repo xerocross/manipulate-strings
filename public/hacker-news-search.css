@@ -16,3 +16,7 @@ label {
 .main-search {
     margin-bottom: 10px;
 }
+.story-list-container {
+    height: 400px;
+    overflow-y: scroll;
+}

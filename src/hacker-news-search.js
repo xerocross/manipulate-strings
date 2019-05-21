@@ -28,21 +28,14 @@ angular.module("hackerNewsSearchApp",[])
             }
             hackerNewsService.getTopStoriesIndex()
             .then((response)=>{
+                $scope.loading = false;
                 if (response.status == "SUCCESS") {
-                    let promises = [];
                     $scope.topStoriesIndex = response.data.slice(0,50);
                     $scope.topStoriesIndex.forEach((id) => {
-                        promises.push(
-                            $scope.getItem(id)
-                        );
+                        $scope.getItem(id)
                     });
-                    $q.all(promises)
-                    .then(()=>{
-                        $scope.loading = false;
-                    })
                 } else {
                     $scope.serverError = true;
-                    $scope.loading = false;
                 }
             })
 

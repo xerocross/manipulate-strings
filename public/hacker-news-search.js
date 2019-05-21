@@ -53,32 +53,33 @@ module.exports.template = `
                 class = "form-control main-search"
             >
         </form>
-        
-        <ul class="list-group">
-            <li class="list-group-item" ng-repeat = "itemNum in topStoriesIndex" ng-show = "items[itemNum].loading || items[itemNum].error || items[itemNum].data.title.toLowerCase().includes(searchText.toLowerCase())">
-                    <p class = "story" ng-show = "items[itemNum].data.url">
-                        <a target="_blank" href = "{{items[itemNum].data.url}}">{{ items[itemNum].data.title }}</a>
-                    </p>
-                    <p class = "story" ng-show = "items[itemNum].error">
-                        could not load data for article #{{itemNum}} 
-                        <a 
-                            ng-click = "getItem(itemNum); $event.preventDefault();"
-                            href="#"
-                        >    
-                        try again
-                        </a>
-                    </p>
-                    <p class = "story" ng-show = "!items[itemNum].error && items[itemNum].loading">
-                        loading...
-                    </p>
-                    <p class = "story" ng-show = "!items[itemNum].error && !items[itemNum].loading && !items[itemNum].data.title">
-                        No title found for this article.  See <a target="_blank" href="https://news.ycombinator.com/">https://news.ycombinator.com/</a>.
-                    </p>
-                    <p class = "story" ng-show = "!items[itemNum].error && !items[itemNum].loading && !items[itemNum].data.url">
-                        \"{{ items[itemNum].data.title }}\" : No url found for article.   See <a target="_blank" href="https://news.ycombinator.com/">https://news.ycombinator.com/</a>.
-                    </p>
-            </li>
-        </ul>
+        <div class="story-list-container" ng-show = "!loading">
+            <ul class="list-group">
+                <li class="list-group-item" ng-repeat = "itemNum in topStoriesIndex" ng-show = "items[itemNum].loading || items[itemNum].error || items[itemNum].data.title.toLowerCase().includes(searchText.toLowerCase())">
+                        <p class = "story" ng-show = "items[itemNum].data.url">
+                            <a target="_blank" href = "{{items[itemNum].data.url}}">{{ items[itemNum].data.title }}</a>
+                        </p>
+                        <p class = "story" ng-show = "items[itemNum].error">
+                            could not load data for article #{{itemNum}} 
+                            <a 
+                                ng-click = "getItem(itemNum); $event.preventDefault();"
+                                href="#"
+                            >    
+                            try again
+                            </a>
+                        </p>
+                        <p class = "story" ng-show = "!items[itemNum].error && items[itemNum].loading">
+                            loading...
+                        </p>
+                        <p class = "story" ng-show = "!items[itemNum].error && !items[itemNum].loading && !items[itemNum].data.title">
+                            No title found for this article.  See <a target="_blank" href="https://news.ycombinator.com/">https://news.ycombinator.com/</a>.
+                        </p>
+                        <p class = "story" ng-show = "!items[itemNum].error && !items[itemNum].loading && !items[itemNum].data.url">
+                            \"{{ items[itemNum].data.title }}\" : No url found for article.   See <a target="_blank" href="https://news.ycombinator.com/">https://news.ycombinator.com/</a>.
+                        </p>
+                </li>
+            </ul>
+        </div>
     </div>
 `
 },{}],3:[function(require,module,exports){
@@ -112,21 +113,14 @@ angular.module("hackerNewsSearchApp",[])
             }
             hackerNewsService.getTopStoriesIndex()
             .then((response)=>{
+                $scope.loading = false;
                 if (response.status == "SUCCESS") {
-                    let promises = [];
                     $scope.topStoriesIndex = response.data.slice(0,50);
                     $scope.topStoriesIndex.forEach((id) => {
-                        promises.push(
-                            $scope.getItem(id)
-                        );
+                        $scope.getItem(id)
                     });
-                    $q.all(promises)
-                    .then(()=>{
-                        $scope.loading = false;
-                    })
                 } else {
                     $scope.serverError = true;
-                    $scope.loading = false;
                 }
             })
 
