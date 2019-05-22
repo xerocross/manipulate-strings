@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "http-server",
-    "watch": "watchify src/hacker-news-search.js -o public/hacker-news-search.js"
+    "watch": "watchify src/hacker-news-search.js -o public/hacker-news-search.js",
+    "test": "karma start ./karma.config.js"
   },
   "keywords": [],
   "author": "",

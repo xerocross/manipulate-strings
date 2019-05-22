@@ -1,4 +1,4 @@
-angular.module("hackerNewsSearchApp")
+angular.module("durableHttpMod",[])
 .service("durableHttpService", ["$http", "$q", function($http, $q) {
     let numTries = 3;
     this.config = function(configObject) {
@@ -9,7 +9,6 @@ angular.module("hackerNewsSearchApp")
         let deferred = $q.defer();
         let iteration = 0
         let attempt = function() {
-            console.log("attempt");
             if (iteration >= numTries) {
                 deferred.resolve({
                     status: "FAIL"

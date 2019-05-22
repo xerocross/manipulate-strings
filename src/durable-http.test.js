@@ -1,45 +1,79 @@
 require("angular-mocks");
 
-it("can add numbers", () => {
-    expect(1+2).toBe(3);
-});
+let backend;
+let url = "https://shaky-hacker-news.herokuapp.com/topstories";
 
+describe("durableHttpMod", ()=>{
 
-it("can mock app", () => {
-    expect(()=> {
-        angular.mock.module("hackerNewsSearchApp");
-    }).not.toThrow();
-});
-
-it("can inject durableHttpService", () => {
-    angular.mock.module("hackerNewsSearchApp");
-
-    // angular.mock.module(function($provide) {
-    //     $provide.value("$http", {
-    //         get : () => {
-    //             console.log("getting");
-    //         }
-    //     });
-    // })
-    let backend;
-    angular.mock.inject(function($httpBackend) {
-        backend = $httpBackend;
-        $httpBackend.expect("GET", "https://shaky-hacker-news.herokuapp.com/topstories")
-        .respond([132,115]);
-    });
-    
-    angular.mock.inject(function(durableHttpService) {
-        console.log("sending");
-        durableHttpService.get("https://shaky-hacker-news.herokuapp.com/topstories")
-        .then((res)=> {
-            console.log("result");
-            console.log(res);
-        })
-        .catch(()=> {
-            console.log("fail");
+    beforeEach(()=>{
+        angular.mock.module("durableHttpMod");
+        angular.mock.inject(function($httpBackend) {
+            backend = $httpBackend;
         });
+    })
 
+    it("on successful query, responds with 'SUCCESS'", (done) => {
+        angular.mock.inject(function(durableHttpService) {
+            backend.expect("GET", url)
+            .respond([123]);
+            durableHttpService.get(url)
+            .then((res)=> {
+                expect(res.status).toBe("SUCCESS");
+                expect(res.data[0]).toBe(123);
+                done();
+            })
+        });
+        backend.flush();
     });
-    backend.flush();
 
-});
+    it("fails after 3 tries (server error)", (done) => {
+        angular.mock.inject(function(durableHttpService) {
+            backend.expect("GET", url)
+            .respond(500, '');
+            backend.expect("GET", url)
+            .respond(500, '');
+            backend.expect("GET", url)
+            .respond(500, '');
+
+            durableHttpService.get(url)
+            .then((res)=> {
+                expect(res.status).toBe("FAIL");
+                done();
+            })
+        });
+        backend.flush();
+    });
+
+    it("succeeds if second get works (server error)", (done) => {
+        angular.mock.inject(function(durableHttpService) {
+            backend.expect("GET", url)
+            .respond(500, '');
+            backend.expect("GET", url)
+            .respond([123]);
+
+            durableHttpService.get(url)
+            .then((res)=> {
+                expect(res.status).toBe("SUCCESS");
+                done();
+            })
+        });
+        backend.flush();
+    });
+
+    it("succeeds if second get works (non 200 status)", (done) => {
+        angular.mock.inject(function(durableHttpService) {
+            backend.expect("GET", url)
+            .respond(400, '');
+            backend.expect("GET", url)
+            .respond([123]);
+
+            durableHttpService.get(url)
+            .then((res)=> {
+                expect(res.status).toBe("SUCCESS");
+                done();
+            })
+        });
+        backend.flush();
+    });
+
+})

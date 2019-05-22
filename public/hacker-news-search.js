@@ -1,11 +1,11 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-angular.module("hackerNewsSearchApp")
+angular.module("durableHttpMod",[])
 .service("durableHttpService", ["$http", "$q", function($http, $q) {
     let numTries = 3;
     this.config = function(configObject) {
         numTries = configObject.numTries;
     }
-
+    this.getVal = ()=>5;
     this.get = function(url) {
         let deferred = $q.defer();
         let iteration = 0
@@ -34,7 +34,6 @@ angular.module("hackerNewsSearchApp")
         }
         attempt();
         return deferred.promise;
-        
     }
 }])
 },{}],2:[function(require,module,exports){
@@ -55,11 +54,11 @@ module.exports.template = `
         </form>
         <div class="story-list-container" ng-show = "!loading">
             <ul class="list-group">
-                <li class="list-group-item" ng-repeat = "itemNum in topStoriesIndex" ng-show = "items[itemNum].loading || items[itemNum].error || items[itemNum].data.title.toLowerCase().includes(searchText.toLowerCase())">
-                        <p class = "story" ng-show = "items[itemNum].data.url">
+                <li class="list-group-item story-list-item" ng-repeat = "itemNum in topStoriesIndex" data-item-num="{{itemNum}}" ng-show = "items[itemNum].loading || items[itemNum].error || items[itemNum].data.title.toLowerCase().includes(searchText.toLowerCase())">
+                        <p class = "story" data-story = "success" ng-if = "items[itemNum].data.url">
                             <a target="_blank" href = "{{items[itemNum].data.url}}">{{ items[itemNum].data.title }}</a>
                         </p>
-                        <p class = "story" ng-show = "items[itemNum].error">
+                        <p class = "story" data-story = "error" ng-if = "items[itemNum].error">
                             could not load data for article #{{itemNum}} 
                             <a 
                                 ng-click = "getItem(itemNum); $event.preventDefault();"
@@ -68,13 +67,13 @@ module.exports.template = `
                             try again
                             </a>
                         </p>
-                        <p class = "story" ng-show = "!items[itemNum].error && items[itemNum].loading">
+                        <p class = "story" data-story = "loading" ng-if= "!items[itemNum].error && items[itemNum].loading">
                             loading...
                         </p>
-                        <p class = "story" ng-show = "!items[itemNum].error && !items[itemNum].loading && !items[itemNum].data.title">
+                        <p class = "story" data-story = "no-title" ng-if = "!items[itemNum].error && !items[itemNum].loading && !items[itemNum].data.title">
                             No title found for this article.  See <a target="_blank" href="https://news.ycombinator.com/">https://news.ycombinator.com/</a>.
                         </p>
-                        <p class = "story" ng-show = "!items[itemNum].error && !items[itemNum].loading && !items[itemNum].data.url">
+                        <p class = "story" data-story = "no-url" ng-if = "!items[itemNum].error && !items[itemNum].loading && !items[itemNum].data.url">
                             \"{{ items[itemNum].data.title }}\" : No url found for article.   See <a target="_blank" href="https://news.ycombinator.com/">https://news.ycombinator.com/</a>.
                         </p>
                 </li>
@@ -84,13 +83,13 @@ module.exports.template = `
 `
 },{}],3:[function(require,module,exports){
 let template = require("./hacker-news-search-template").template;
+require("./durable-http");
 
-angular.module("hackerNewsSearchApp",[])
+angular.module("hackerNewsSearchApp", ["durableHttpMod"])
 .directive("hackerNewsSearch", function() {
     return {
         template: template,
-        controller : ["$scope", "$q", "hackerNewsService", function($scope, $q, hackerNewsService) {
-
+        controller : ["$scope", "hackerNewsService", function($scope, hackerNewsService) {
             $scope.loading = true;
             $scope.topStoriesIndex = [];
             $scope.items = {};
@@ -111,32 +110,31 @@ angular.module("hackerNewsSearchApp",[])
                         }
                     });
             }
-            hackerNewsService.getTopStoriesIndex()
-            .then((response)=>{
-                $scope.loading = false;
-                if (response.status == "SUCCESS") {
-                    $scope.topStoriesIndex = response.data.slice(0,50);
-                    $scope.topStoriesIndex.forEach((id) => {
-                        $scope.getItem(id)
-                    });
-                } else {
-                    $scope.serverError = true;
-                }
-            })
-
+            $scope.getTopStories = () => {
+                hackerNewsService.getTopStoriesIndex()
+                .then((response)=>{
+                    $scope.loading = false;
+                    if (response.status == "SUCCESS") {
+                        $scope.topStoriesIndex = response.data.slice(0,50);
+                        $scope.topStoriesIndex.forEach((id) => {
+                            $scope.getItem(id)
+                        });
+                    } else {
+                        $scope.serverError = true;
+                    }
+                })
+            }
+            $scope.getTopStories();
         }]
     }
 })
-
-// require("./durable-http");
+.run(function() {
+    //angular.element($("hacker-news-search")[0]).$scope.getTopStories();
+});
 require("./hacker-news-service");
-},{"./hacker-news-search-template":2,"./hacker-news-service":4}],4:[function(require,module,exports){
-require("./durable-http");
-
+},{"./durable-http":1,"./hacker-news-search-template":2,"./hacker-news-service":4}],4:[function(require,module,exports){
 angular.module("hackerNewsSearchApp")
 .service("hackerNewsService", ["$http", "$q", "durableHttpService", function($http, $q, durableHttpService) {
-    this.itemNumbers = [];
-    this.items = {};
     let self = this;
     function getItemUrl (itemNum) {
         return `https://shaky-hacker-news.herokuapp.com/item/${itemNum}`;
@@ -153,4 +151,4 @@ angular.module("hackerNewsSearchApp")
 
 }]);
 
-},{"./durable-http":1}]},{},[3]);
+},{}]},{},[3]);

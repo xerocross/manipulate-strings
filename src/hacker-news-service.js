@@ -1,5 +1,3 @@
-require("./durable-http");
-
 angular.module("hackerNewsSearchApp")
 .service("hackerNewsService", ["$http", "$q", "durableHttpService", function($http, $q, durableHttpService) {
     let self = this;

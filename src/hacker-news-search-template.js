@@ -15,11 +15,11 @@ module.exports.template = `
         </form>
         <div class="story-list-container" ng-show = "!loading">
             <ul class="list-group">
-                <li class="list-group-item" ng-repeat = "itemNum in topStoriesIndex" ng-show = "items[itemNum].loading || items[itemNum].error || items[itemNum].data.title.toLowerCase().includes(searchText.toLowerCase())">
-                        <p class = "story" ng-show = "items[itemNum].data.url">
+                <li class="list-group-item story-list-item" ng-repeat = "itemNum in topStoriesIndex" data-item-num="{{itemNum}}" ng-show = "items[itemNum].loading || items[itemNum].error || items[itemNum].data.title.toLowerCase().includes(searchText.toLowerCase())">
+                        <p class = "story" data-story = "success" ng-if = "items[itemNum].data.url">
                             <a target="_blank" href = "{{items[itemNum].data.url}}">{{ items[itemNum].data.title }}</a>
                         </p>
-                        <p class = "story" ng-show = "items[itemNum].error">
+                        <p class = "story" data-story = "error" ng-if = "items[itemNum].error">
                             could not load data for article #{{itemNum}} 
                             <a 
                                 ng-click = "getItem(itemNum); $event.preventDefault();"
@@ -28,13 +28,13 @@ module.exports.template = `
                             try again
                             </a>
                         </p>
-                        <p class = "story" ng-show = "!items[itemNum].error && items[itemNum].loading">
+                        <p class = "story" data-story = "loading" ng-if= "!items[itemNum].error && items[itemNum].loading">
                             loading...
                         </p>
-                        <p class = "story" ng-show = "!items[itemNum].error && !items[itemNum].loading && !items[itemNum].data.title">
+                        <p class = "story" data-story = "no-title" ng-if = "!items[itemNum].error && !items[itemNum].loading && !items[itemNum].data.title">
                             No title found for this article.  See <a target="_blank" href="https://news.ycombinator.com/">https://news.ycombinator.com/</a>.
                         </p>
-                        <p class = "story" ng-show = "!items[itemNum].error && !items[itemNum].loading && !items[itemNum].data.url">
+                        <p class = "story" data-story = "no-url" ng-if = "!items[itemNum].error && !items[itemNum].loading && !items[itemNum].data.url">
                             \"{{ items[itemNum].data.title }}\" : No url found for article.   See <a target="_blank" href="https://news.ycombinator.com/">https://news.ycombinator.com/</a>.
                         </p>
                 </li>
