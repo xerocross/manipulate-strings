@@ -1,11 +1,11 @@
 {
-  "name": "hacker-news-search",
+  "name": "manipulate-strings",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "http-server",
-    "watch": "watchify src/hacker-news-search.js -o public/hacker-news-search.js",
+    "watch": "watchify src/manipulate-strings.js -o public/manipulate-strings.js",
     "test": "karma start ./karma.config.js"
   },
   "keywords": [],

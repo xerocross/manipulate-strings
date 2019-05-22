@@ -1,0 +1,16 @@
+.function-name-display {
+    min-width: 5em;
+}
+
+.main-btn-group-outer {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.index-col {
+    width: 5%;
+}
+.function-col {
+    width: 30%;
+}

@@ -17,7 +17,8 @@ module.exports = function(config) {
     files: [
       'public/jquery-3.4.1.min.js',
       "public/angular.js",
-      'src/hacker-news-search.js',
+      'src/manipulate-strings-service.js',
+      'src/manipulate-strings.js',
       'src/*.test.js'
     ],
 
