@@ -1,15 +1,11 @@
 let mockScope;
 let compileService;
-let backend;
 
 require("./manipulate-strings.js");
 
 describe("manipulate strings dir",() => {
     beforeEach(() => {
         angular.mock.module("manipulateStringsApp");
-        angular.mock.inject(function($httpBackend) {
-            backend = $httpBackend;
-        });
         angular.mock.inject(function($rootScope, $compile) {
             mockScope = $rootScope.$new();
             compileService = $compile
