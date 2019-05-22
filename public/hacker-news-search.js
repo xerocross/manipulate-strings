@@ -4593,45 +4593,15 @@ function toSubscriber(nextOrObserver, error, complete) {
 exports.toSubscriber = toSubscriber;
 
 },{"../Observer":7,"../Subscriber":13,"../symbol/rxSubscriber":72}],102:[function(require,module,exports){
-let Subject = require("rxjs").Subject;
 let Observable = require("rxjs").Observable;
 
 angular.module("durableHttpMod",[])
-.service("durableHttpService", ["$http", "$q", "$timeout", function($http, $q, $timeout) {
+.service("durableHttpService", ["$http", function($http) {
     let numTries = 3;
     this.config = function(configObject) {
         numTries = configObject.numTries;
     }
     this.get = function(url) {
-        let deferred = $q.defer();
-        let iteration = 0
-        let attempt = function() {
-            if (iteration >= numTries) {
-                deferred.resolve({
-                    status: "FAIL"
-                });
-            } else {
-                iteration++;
-                $http.get(url)
-                .then((response)=>{
-                    if (response.status == 200) {
-                        deferred.resolve({
-                            status: "SUCCESS",
-                            data : response.data
-                        })
-                    } else {
-                        attempt();
-                    }
-                })
-                .catch(() =>{
-                    attempt();
-                })
-            }
-        }
-        attempt();
-        return deferred.promise;
-    }
-    this._get = function(url) {
         let iteration = 0;
         let observable = new Observable((observer)=> {
             let attempt = function() {
@@ -4733,7 +4703,7 @@ angular.module("hackerNewsSearchApp", ["durableHttpMod"])
                 $scope.items[id].loading = true;
                 $scope.items[id].error = false;
                 $scope.items[id].loadingMessage = $scope.loadingMessages[0];
-                hackerNewsService._getStory(id)
+                hackerNewsService.getStory(id)
                 .subscribe((response) => {
                     if (response.status == "ATTEMPTING") {
                         if (response.data.attemptNum < $scope.loadingMessages.length) {
@@ -4751,7 +4721,7 @@ angular.module("hackerNewsSearchApp", ["durableHttpMod"])
                 })
             }
             $scope.getTopStories = () => {
-                hackerNewsService._getTopStoriesIndex()
+                hackerNewsService.getTopStoriesIndex()
                 .subscribe((response) => {
                     if (response.status == "ATTEMPTING") {
                         if (response.data.attemptNum < $scope.loadingMessages.length) {
@@ -4787,18 +4757,12 @@ angular.module("hackerNewsSearchApp")
         let url = getItemUrl(itemNum);
         return durableHttpService.get(url);
     }
-    self._getStory = function (itemNum) {
-        let url = getItemUrl(itemNum);
-        return durableHttpService._get(url);
-    }
     self.topStoriesUrl = "https://shaky-hacker-news.herokuapp.com/topstories";
     
     self.getTopStoriesIndex = function() {
         return  durableHttpService.get(self.topStoriesUrl);
     }
-    self._getTopStoriesIndex = function() {
-        return  durableHttpService._get(self.topStoriesUrl);
-    }
+
 }]);
 
 },{}]},{},[104]);

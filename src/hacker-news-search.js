@@ -19,7 +19,7 @@ angular.module("hackerNewsSearchApp", ["durableHttpMod"])
                 $scope.items[id].loading = true;
                 $scope.items[id].error = false;
                 $scope.items[id].loadingMessage = $scope.loadingMessages[0];
-                hackerNewsService._getStory(id)
+                hackerNewsService.getStory(id)
                 .subscribe((response) => {
                     if (response.status == "ATTEMPTING") {
                         if (response.data.attemptNum < $scope.loadingMessages.length) {
@@ -37,7 +37,7 @@ angular.module("hackerNewsSearchApp", ["durableHttpMod"])
                 })
             }
             $scope.getTopStories = () => {
-                hackerNewsService._getTopStoriesIndex()
+                hackerNewsService.getTopStoriesIndex()
                 .subscribe((response) => {
                     if (response.status == "ATTEMPTING") {
                         if (response.data.attemptNum < $scope.loadingMessages.length) {

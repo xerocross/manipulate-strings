@@ -17,10 +17,12 @@ describe("durableHttpMod", ()=>{
             backend.expect("GET", url)
             .respond([123]);
             durableHttpService.get(url)
-            .then((res)=> {
-                expect(res.status).toBe("SUCCESS");
-                expect(res.data[0]).toBe(123);
-                done();
+            .subscribe((res)=> {
+                if (res.status == "SUCCESS") { 
+                    expect(res.data[0]).toBe(123);
+                    done();
+                }
+                
             })
         });
         backend.flush();
@@ -36,9 +38,10 @@ describe("durableHttpMod", ()=>{
             .respond(500, '');
 
             durableHttpService.get(url)
-            .then((res)=> {
-                expect(res.status).toBe("FAIL");
-                done();
+            .subscribe((res)=> {
+                if (res.status == "FAIL") {
+                    done();
+                }
             })
         });
         backend.flush();
@@ -52,9 +55,10 @@ describe("durableHttpMod", ()=>{
             .respond([123]);
 
             durableHttpService.get(url)
-            .then((res)=> {
-                expect(res.status).toBe("SUCCESS");
-                done();
+            .subscribe((res)=> {
+                if (res.status == "SUCCESS") {
+                    done();
+                }
             })
         });
         backend.flush();
@@ -68,9 +72,10 @@ describe("durableHttpMod", ()=>{
             .respond([123]);
 
             durableHttpService.get(url)
-            .then((res)=> {
-                expect(res.status).toBe("SUCCESS");
-                done();
+            .subscribe((res)=> {
+                if (res.status == "SUCCESS") {
+                    done();
+                }
             })
         });
         backend.flush();
