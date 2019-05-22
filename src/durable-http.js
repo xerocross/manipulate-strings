@@ -4,11 +4,12 @@ angular.module("hackerNewsSearchApp")
     this.config = function(configObject) {
         numTries = configObject.numTries;
     }
-
+    this.getVal = ()=>5;
     this.get = function(url) {
         let deferred = $q.defer();
         let iteration = 0
         let attempt = function() {
+            console.log("attempt");
             if (iteration >= numTries) {
                 deferred.resolve({
                     status: "FAIL"
@@ -33,6 +34,5 @@ angular.module("hackerNewsSearchApp")
         }
         attempt();
         return deferred.promise;
-        
     }
 }])

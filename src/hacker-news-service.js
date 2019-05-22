@@ -2,8 +2,6 @@ require("./durable-http");
 
 angular.module("hackerNewsSearchApp")
 .service("hackerNewsService", ["$http", "$q", "durableHttpService", function($http, $q, durableHttpService) {
-    this.itemNumbers = [];
-    this.items = {};
     let self = this;
     function getItemUrl (itemNum) {
         return `https://shaky-hacker-news.herokuapp.com/item/${itemNum}`;

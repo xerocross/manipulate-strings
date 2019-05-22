@@ -4,8 +4,7 @@ angular.module("hackerNewsSearchApp",[])
 .directive("hackerNewsSearch", function() {
     return {
         template: template,
-        controller : ["$scope", "$q", "hackerNewsService", function($scope, $q, hackerNewsService) {
-
+        controller : ["$scope", "hackerNewsService", function($scope, hackerNewsService) {
             $scope.loading = true;
             $scope.topStoriesIndex = [];
             $scope.items = {};
@@ -42,6 +41,4 @@ angular.module("hackerNewsSearchApp",[])
         }]
     }
 })
-
-// require("./durable-http");
 require("./hacker-news-service");
