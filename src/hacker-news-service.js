@@ -8,10 +8,16 @@ angular.module("hackerNewsSearchApp")
         let url = getItemUrl(itemNum);
         return durableHttpService.get(url);
     }
+    self._getStory = function (itemNum) {
+        let url = getItemUrl(itemNum);
+        return durableHttpService._get(url);
+    }
     self.topStoriesUrl = "https://shaky-hacker-news.herokuapp.com/topstories";
     
     self.getTopStoriesIndex = function() {
         return  durableHttpService.get(self.topStoriesUrl);
     }
-
+    self._getTopStoriesIndex = function() {
+        return  durableHttpService._get(self.topStoriesUrl);
+    }
 }]);

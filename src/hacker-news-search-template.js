@@ -1,7 +1,7 @@
 module.exports.template = `
     <div>
-        <p class = "alert alert-info loading" ng-show = "loading">loading</p>
-        <p class = "alert alert-info error" ng-show = "serverError" ng-cloak>Could not reach the server.  Please try again later.</p>
+        <p class = "alert alert-info loading loading-message" ng-if = "loading">{{loadingMessages[loadingMessage]}}</p>
+        <p class = "alert alert-warning error loading-error" ng-if = "serverError" ng-cloak>{{mainLoadingErrorMessage}}</p>
         <h2>Hacker News Top Stories</h2>
         <form name = "searchForm">
             <label for "searchField">Enter Search Phrase</label>
@@ -28,9 +28,7 @@ module.exports.template = `
                             try again
                             </a>
                         </p>
-                        <p class = "story" data-story = "loading" ng-if= "!items[itemNum].error && items[itemNum].loading">
-                            loading...
-                        </p>
+                        <p class = "story" data-story = "loading" ng-if= "!items[itemNum].error && items[itemNum].loading">{{items[itemNum].loadingMessage}}</p>
                         <p class = "story" data-story = "no-title" ng-if = "!items[itemNum].error && !items[itemNum].loading && !items[itemNum].data.title">
                             No title found for this article.  See <a target="_blank" href="https://news.ycombinator.com/">https://news.ycombinator.com/</a>.
                         </p>

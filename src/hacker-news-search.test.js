@@ -23,6 +23,8 @@ describe("hackerNewsSearchApp",() => {
 
     it("getTopStories populates topStoriesIndex", () => {
         backend.expect("GET", storiesUrl)
+        .respond(500, "");
+        backend.expect("GET", storiesUrl)
         .respond([123,453]);
         backend.expect("GET", getItemUrl(123))
         .respond(200, "");
@@ -32,11 +34,96 @@ describe("hackerNewsSearchApp",() => {
         let compileFn = compileService("<hacker-news-search></hacker-news-search>");
         let elem = compileFn(mockScope);
         backend.flush();
-        //mockScope.getItem = function(num) {}
-        //mockScope.getTopStories();
         
         expect(mockScope.topStoriesIndex[0]).toBe(123);
         expect(mockScope.topStoriesIndex[1]).toBe(453);
+    })
+
+    it("one failed attempt updates loading message to 1", () => {
+        backend.expect("GET", storiesUrl)
+        .respond(500, "");
+        backend.expect("GET", storiesUrl)
+        .respond([123,453]);
+        let compileFn = compileService("<hacker-news-search></hacker-news-search>");
+        let elem = compileFn(mockScope);
+        backend.flush(1);
+        expect(elem.find(".loading-message")[0].innerText).toBe(mockScope.loadingMessages[mockScope.loadingMessage]);
+        expect(mockScope.loadingMessage).toBe(1);
+    })
+
+    it("two failed attempts updates loading message to 2", () => {
+        backend.expect("GET", storiesUrl)
+        .respond(500, "");
+        backend.expect("GET", storiesUrl)
+        .respond(500, "");
+        backend.expect("GET", storiesUrl)
+        .respond([123,453]);
+        let compileFn = compileService("<hacker-news-search></hacker-news-search>");
+        let elem = compileFn(mockScope);
+        backend.flush(2);
+        expect(elem.find(".loading-message")[0].innerText).toBe(mockScope.loadingMessages[mockScope.loadingMessage]);
+        expect(mockScope.loadingMessage).toBe(2);
+    })
+
+    it("three failed attempts updates loading message to 3", () => {
+        backend.expect("GET", storiesUrl)
+        .respond(500, "");
+        backend.expect("GET", storiesUrl)
+        .respond(500, "");
+        backend.expect("GET", storiesUrl)
+        .respond(500, "");
+        let compileFn = compileService("<hacker-news-search></hacker-news-search>");
+        let elem = compileFn(mockScope);
+        backend.flush(3);
+        expect(mockScope.serverError).toBe(true);
+        expect(elem.find(".loading-error")[0].innerText).toBe(mockScope.mainLoadingErrorMessage);
+    })
+
+    it("item one failed attempt shows loadingmessage[1]", () => {
+        backend.expect("GET", storiesUrl)
+        .respond([321]);
+        backend.expect("GET", getItemUrl(321))
+        .respond(500,"");
+        backend.expect("GET", getItemUrl(321))
+        .respond({title : "bear", url : "https://www.google.com"});
+
+        let compileFn = compileService("<hacker-news-search></hacker-news-search>");
+        let elem = compileFn(mockScope);
+        backend.flush(2);
+        expect($(elem.find("[data-item-num=321]")[0]).find("[data-story=loading]")[0].innerText).toBe(mockScope.loadingMessages[1]);
+    })
+
+    
+    it("item two failed attempts shows loadingmessage[2]", () => {
+        backend.expect("GET", storiesUrl)
+        .respond([321]);
+        backend.expect("GET", getItemUrl(321))
+        .respond(500,"");
+        backend.expect("GET", getItemUrl(321))
+        .respond(500,"");
+        backend.expect("GET", getItemUrl(321))
+        .respond({title : "bear", url : "https://www.google.com"});
+
+        let compileFn = compileService("<hacker-news-search></hacker-news-search>");
+        let elem = compileFn(mockScope);
+        backend.flush(3);
+        expect($(elem.find("[data-item-num=321]")[0]).find("[data-story=loading]")[0].innerText).toBe(mockScope.loadingMessages[2]);
+    })
+
+    it("item three failed attempts shows error message", () => {
+        backend.expect("GET", storiesUrl)
+        .respond([321]);
+        backend.expect("GET", getItemUrl(321))
+        .respond(500,"");
+        backend.expect("GET", getItemUrl(321))
+        .respond(500,"");
+        backend.expect("GET", getItemUrl(321))
+        .respond(500, "");
+
+        let compileFn = compileService("<hacker-news-search></hacker-news-search>");
+        let elem = compileFn(mockScope);
+        backend.flush(4);
+        expect($(elem.find("[data-item-num=321]")[0]).find("[data-story=error]").length).toBe(1);
     })
 
     it("getTopStories causes getItem to be called for each story id", () => {
@@ -68,7 +155,7 @@ describe("hackerNewsSearchApp",() => {
 
         let compileFn = compileService("<hacker-news-search></hacker-news-search>");
         let elem = compileFn(mockScope);
-                backend.flush();
+        backend.flush();
         expect(mockScope.loading).toBe(false);
         expect(mockScope.topStoriesIndex.length).toBe(1);
 
@@ -80,16 +167,6 @@ describe("hackerNewsSearchApp",() => {
         expect($(storyEl).find("a")[0].href).toMatch("https://www.google.com");
     });
 
-    it("getTopStories shows loading before the backend topstories responds", () => {
-        backend.expect("GET", storiesUrl)
-        .respond([321]);
-        backend.expect("GET", getItemUrl(321))
-        .respond({title : "bear", url : "https://www.google.com"});
-
-        let compileFn = compileService("<hacker-news-search></hacker-news-search>");
-        let elem = compileFn(mockScope);
-        expect(mockScope.loading).toBe(true);
-    });
 
     it("getTopStories shows not loading after top stories responds", () => {
         backend.expect("GET", storiesUrl)
