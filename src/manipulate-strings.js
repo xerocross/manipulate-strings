@@ -21,6 +21,29 @@ angular.module("manipulateStringsApp", ["manipulateStringsMod"])
             $scope.stringResults = [];
             $scope.replaceSubstring = "";
             $scope.newSubstring = "";
+            $scope.selectedTransform = "alphabetize";
+            $scope.transformOptions = [
+                {
+                    title: "alphabetize",
+                    id : "alphabetize"
+                },
+                {
+                    title: "remove all characters that appear more than once",
+                    id : "nodupes"
+                },
+                {
+                    title: "reverse",
+                    id : "reverse"
+                },
+                {
+                    title: "remove spaces",
+                    id : "nospace"
+                },
+                {
+                    title: "replace substrings",
+                    id : "replaceSubstring"
+                }
+            ];
             $scope.inputChange = function(inputString) {
                 let transform = new Transform(null, "init", (x)=>x, inputString);
 

@@ -54,42 +54,50 @@ module.exports.template = `
                     <div>
                         <label>Elementary Transformations</label>
                     </div>
-                    <button ng-disabled="stringInputForm.mainStringInput.$pristine"
-                        class="btn btn-primary remove-duplicated-button"
-                        ng-click="removeDuplicated(stringResults[stringResults.length - 1].string)">
-                        remove chars that appear more than once
-                    </button>
-                    <button ng-disabled="stringInputForm.mainStringInput.$pristine" class="btn btn-primary 
-                        reverse-string-button" ng-click="reverseString(stringResults[stringResults.length - 1].string)">
-                        reverse string
-                    </button>
-                    <button ng-disabled="stringInputForm.mainStringInput.$pristine" class="btn btn-primary 
-                    remove-spaces-button" ng-click="removeSpaces(stringResults[stringResults.length - 1].string)">
-                        remove spaces
-                    </button>
-                    <button ng-disabled="stringInputForm.mainStringInput.$pristine" 
-                    class="btn btn-primary alphabatize-string-button" 
-                        ng-click="alphabatize(stringResults[stringResults.length - 1].string)"
-                    >
-                        alphabatize
-                    </button>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <label>Substring Replace</label>
-                    <div class=" form-group">
-                        <label for="replaceSubstring">search substring</label>
-                        <input type="text" name="replaceSubstring" ng-model="replaceSubstring"
-                            class="replace-substring-input form-control" />
-                        <label for="newSubstring">new substring</label>
-                        <input type="text" name="newSubstring" ng-model="newSubstring"
-                            class="new-substring-input form-control" />
-                        <button class="replace-substring-button form-control btn btn-primary"
-                            ng-click="replaceSubstringAll(replaceSubstring, newSubstring)(inputString)"
-                            ng-disabled="!(replaceSubstring.length > 0)">
-                            replace
+                    <select class="form-control" ng-model = "selectedTransform">
+                        <option ng-repeat = "opt in transformOptions" value="{{opt.id}}">{{opt.title}}</option>
+                    </select>
+                    <div ng-show = "selectedTransform == 'alphabetize'">
+                        <button ng-disabled="stringInputForm.mainStringInput.$pristine" 
+                        class="btn btn-primary alphabatize-string-button" 
+                            ng-click="alphabatize(stringResults[stringResults.length - 1].string)"
+                        >
+                            alphabatize
                         </button>
+                    </div>
+                    <div ng-show = "selectedTransform == 'reverse'">
+                        <button ng-disabled="stringInputForm.mainStringInput.$pristine" class="btn btn-primary 
+                            reverse-string-button" ng-click="reverseString(stringResults[stringResults.length - 1].string)">
+                            reverse string
+                        </button>
+                    </div>
+                    <div ng-show = "selectedTransform == 'nodupes'">
+                        <button ng-disabled="stringInputForm.mainStringInput.$pristine"
+                            class="btn btn-primary remove-duplicated-button"
+                            ng-click="removeDuplicated(stringResults[stringResults.length - 1].string)">
+                            remove chars that appear more than once
+                        </button>
+                    </div>
+                    <div ng-show = "selectedTransform == 'nospace'">
+                        <button ng-disabled="stringInputForm.mainStringInput.$pristine" class="btn btn-primary 
+                        remove-spaces-button" ng-click="removeSpaces(stringResults[stringResults.length - 1].string)">
+                            remove spaces
+                        </button>
+                    </div>
+                    <div ng-show = "selectedTransform == 'replaceSubstring'">
+                        <div class=" form-group">
+                            <label for="replaceSubstring">search substring</label>
+                            <input type="text" name="replaceSubstring" ng-model="replaceSubstring"
+                                class="replace-substring-input form-control" />
+                            <label for="newSubstring">new substring</label>
+                            <input type="text" name="newSubstring" ng-model="newSubstring"
+                                class="new-substring-input form-control" />
+                            <button class="replace-substring-button form-control btn btn-primary"
+                                ng-click="replaceSubstringAll(replaceSubstring, newSubstring)(inputString)"
+                                ng-disabled="!(replaceSubstring.length > 0)">
+                                replace
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
