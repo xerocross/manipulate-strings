@@ -105,4 +105,11 @@ describe("mutateStringService",() => {
         let newSubstring = "bat";
         expect(service.replaceSubstringAll(substring, newSubstring)(testString)).toBe("rbattbattbatt");
     })
+
+    it("alphabatize strings",function() {
+        let testString = "ratatat";
+        let expectedResult = "aaarttt";
+        expect(service.alphabatize(testString)).toBe(expectedResult);
+    })
+
 })

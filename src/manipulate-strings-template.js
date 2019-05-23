@@ -57,7 +57,7 @@ module.exports.template = `
                     <button ng-disabled="stringInputForm.mainStringInput.$pristine"
                         class="btn btn-primary remove-duplicated-button"
                         ng-click="removeDuplicated(stringResults[stringResults.length - 1].string)">
-                        remove duplicated
+                        remove chars that appear more than once
                     </button>
                     <button ng-disabled="stringInputForm.mainStringInput.$pristine" class="btn btn-primary 
                         reverse-string-button" ng-click="reverseString(stringResults[stringResults.length - 1].string)">
@@ -66,6 +66,12 @@ module.exports.template = `
                     <button ng-disabled="stringInputForm.mainStringInput.$pristine" class="btn btn-primary 
                     remove-spaces-button" ng-click="removeSpaces(stringResults[stringResults.length - 1].string)">
                         remove spaces
+                    </button>
+                    <button ng-disabled="stringInputForm.mainStringInput.$pristine" 
+                    class="btn btn-primary alphabatize-string-button" 
+                        ng-click="alphabatize(stringResults[stringResults.length - 1].string)"
+                    >
+                        alphabatize
                     </button>
                 </div>
             </div>

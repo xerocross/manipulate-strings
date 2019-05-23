@@ -69,6 +69,9 @@ angular.module("manipulateStringsMod", [])
     this.removeSpaces = function(str) {
         return this.removeSubstringAll(str, " ");
     }
+    this.alphabatize = function (str) {
+        return str.split("").sort().join("");
+    }
 });
 },{}],2:[function(require,module,exports){
 module.exports.template = `
@@ -130,7 +133,7 @@ module.exports.template = `
                     <button ng-disabled="stringInputForm.mainStringInput.$pristine"
                         class="btn btn-primary remove-duplicated-button"
                         ng-click="removeDuplicated(stringResults[stringResults.length - 1].string)">
-                        remove duplicated
+                        remove chars that appear more than once
                     </button>
                     <button ng-disabled="stringInputForm.mainStringInput.$pristine" class="btn btn-primary 
                         reverse-string-button" ng-click="reverseString(stringResults[stringResults.length - 1].string)">
@@ -139,6 +142,12 @@ module.exports.template = `
                     <button ng-disabled="stringInputForm.mainStringInput.$pristine" class="btn btn-primary 
                     remove-spaces-button" ng-click="removeSpaces(stringResults[stringResults.length - 1].string)">
                         remove spaces
+                    </button>
+                    <button ng-disabled="stringInputForm.mainStringInput.$pristine" 
+                    class="btn btn-primary alphabatize-string-button" 
+                        ng-click="alphabatize(stringResults[stringResults.length - 1].string)"
+                    >
+                        alphabatize
                     </button>
                 </div>
             </div>
@@ -212,6 +221,11 @@ angular.module("manipulateStringsApp", ["manipulateStringsMod"])
             $scope.replaceSubstringAll = function(substring, newSubstring) {
                 let transformFunc = (x)=>manipulateStringsService.replaceSubstringAll(substring, newSubstring)(x);
                 let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],`replace all ${substring} with ${newSubstring}`, transformFunc);
+                $scope.stringResults.push(transform);
+            }
+            $scope.alphabatize = function() {
+                let transformFunc = (x)=>manipulateStringsService.alphabatize(x);
+                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],`alphabatize`, transformFunc);
                 $scope.stringResults.push(transform);
             }
             $scope.removeTransform = function(index) {

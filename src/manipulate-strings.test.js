@@ -12,7 +12,6 @@ require("./manipulate-strings.js");
                 mockScope = $rootScope.$new();
                 compileService = $compile
             });
-            
         });
 
         it ("updates the inputElement", () => {
@@ -164,11 +163,8 @@ require("./manipulate-strings.js");
             let compileFn = compileService("<manipulate-strings></manipulate-strings>");
             let elem = compileFn(mockScope);
             $(elem.find(".main-string-input")[0]).val("apple pie brandy").trigger('input');
-
-
             $(elem.find(".reverse-string-button")[0]).trigger("click");
             // ydnarb eip elppa
-            // 
             $(elem.find(".remove-spaces-button")[0]).trigger("click");
             let len = mockScope.stringResults.length;
             expect(mockScope.stringResults[len - 1].toString()).toBe("ydnarbeipelppa");
@@ -187,4 +183,13 @@ require("./manipulate-strings.js");
             expect(mockScope.stringResults[len - 1].toString()).toBe("applepiebrandy");
         });
 
+        it ("can alphabatize string", () => {
+            let compileFn = compileService("<manipulate-strings></manipulate-strings>");
+            let elem = compileFn(mockScope);
+            $(elem.find(".main-string-input")[0]).val("apple pie brandy").trigger('input');
+            $(elem.find(".alphabatize-string-button")[0]).trigger("click");
+            let expected = "  aabdeeilnpppry"
+            let len = mockScope.stringResults.length;
+            expect(mockScope.stringResults[len - 1].toString()).toBe(expected);
+        });
     })

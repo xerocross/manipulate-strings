@@ -68,4 +68,7 @@ angular.module("manipulateStringsMod", [])
     this.removeSpaces = function(str) {
         return this.removeSubstringAll(str, " ");
     }
+    this.alphabatize = function (str) {
+        return str.split("").sort().join("");
+    }
 });

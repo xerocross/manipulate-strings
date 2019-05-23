@@ -47,6 +47,11 @@ angular.module("manipulateStringsApp", ["manipulateStringsMod"])
                 let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],`replace all ${substring} with ${newSubstring}`, transformFunc);
                 $scope.stringResults.push(transform);
             }
+            $scope.alphabatize = function() {
+                let transformFunc = (x)=>manipulateStringsService.alphabatize(x);
+                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],`alphabatize`, transformFunc);
+                $scope.stringResults.push(transform);
+            }
             $scope.removeTransform = function(index) {
                 if (index < 1 || index >= $scope.stringResults.length) {
                     throw new Error("index out of bounds");
