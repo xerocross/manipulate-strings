@@ -1,4 +1,3 @@
-module.exports.template = `
 <div>
     <div class = "row">
         <div class="col-lg-6">
@@ -22,7 +21,7 @@ module.exports.template = `
                         <th class="index-col" scope="col">#</th>
                         <th scope="col" class="function-col">Transformation</th>
                         <th scope="col">Result</th>
-                        <th scope="col" lass="remove-button">X</th>
+                        <th scope="col">Remove this Transform</th>
 
                     </tr>
                 </thead>
@@ -32,11 +31,11 @@ module.exports.template = `
                         <td class="function-col">{{resultObject.description}}</td>
 
                         <td class=""><span class="result-string">{{ resultObject.toString() }}</span></td>
-                        <td class="remove-button">
-                            <span class = "btn-span" ng-if="$index > 0" data-remove-button="{{ $index }}"
+                        <td class="">
+                            <a ng-if="$index > 0" data-remove-button="{{ $index }}" href="#"
                                 ng-click="removeTransform($index)">
-                                X
-                            </span>
+                                remove
+                            </a>
                         </td>
                     </tr>
                 </tbody>
@@ -45,9 +44,9 @@ module.exports.template = `
         <div class="col-lg-6">
 
             <p class="alert alert-info">
-                Use this interface to apply transformations to the string.  After you have 
-                created a sequence of transforms, you can change the input string and 
-                the entire table will be live-updated.
+                The table below maintains a list of the transformations you have made.  You 
+                can remove individual transforms.  If you change the input string, this table
+                will update by piping the new input through all of your transformations.
             </p>
             <div class="main-btn-group-outer form-group card">
                 <div class="card-body">
@@ -90,4 +89,3 @@ module.exports.template = `
         </div>
     </div>
 </div>
-`

@@ -48,113 +48,182 @@ angular.module("manipulateStringsMod", [])
         }
         return resultArray.toString();
     }
+    this.replaceSubstringAll = function(substring, newSubstring) {
+        return (str) => {
+            let i = 0;
+            let len = substring.length;
+            let remaining = str.substring(i);
+            let frontpart = "";
+            while (i = remaining.indexOf(substring), i > -1) {
+                // split into front working part and the new remaining
+                let workingPart = remaining.substring(0 , i+ len);
+                // append the workingPart and make the substitution
+                frontpart += workingPart.replace(substring, newSubstring);
+                // cut the remaining to exclude the current working part
+                remaining = remaining.substring(i + len);
+            }
+            frontpart += remaining;
+            return frontpart;
+        }
+    }
     this.removeSpaces = function(str) {
         return this.removeSubstringAll(str, " ");
     }
 });
 },{}],2:[function(require,module,exports){
 module.exports.template = `
-    <div>
-        <label for = "mainStringInput">
-            Enter String
-        </label>
-        <form name = "stringInputForm">
-        <input
-            class = "form-control main-string-input"
-            name = "mainStringInput"
-            type = "text"
-            ng-model = "inputString"
-            ng-change = "inputChange(inputString)"
-        />
-        </form>
-        <div class="main-btn-group-outer">
-        <div class="btn-group">
-            <button 
-                ng-disabled = "stringInputForm.mainStringInput.$pristine" 
-                class="btn btn-primary remove-duplicated-button" 
-                ng-click = "removeDuplicated(stringResults[stringResults.length - 1].string)"
-            >
-                remove duplicated
-            </button>
-            <button 
-                ng-disabled = "stringInputForm.mainStringInput.$pristine" 
-                class="btn btn-primary 
-                reverse-string-button" 
-                ng-click = "reverseString(stringResults[stringResults.length - 1].string)"
-            >
-                reverse string
-            </button>
-            <button 
-                ng-disabled = "stringInputForm.mainStringInput.$pristine" 
-                class="btn btn-primary 
-                remove-spaces-button" 
-                ng-click = "removeSpaces(stringResults[stringResults.length - 1].string)"
-            >
-                remove spaces
-            </button>
-        </div>
-        </div>
-        <table  class= "result-array-container table">
-            <thead>
-                <tr>
-                    <th class = "index-col" scope="col">#</th>
-                    <th scope="col" class= "function-col">Transformation</th>
-                    <th scope="col">Result</th>
+<div>
+    <div class = "row">
+        <div class="col-lg-6">
+            <p>
+                Enter any initial string and then you can use the form below to
+                transform it. The results of the last transform get piped into
+                the next transform you choose.
+            </p>
+            <div>
+                <label for="mainStringInput">
+                    Initial String
+                </label>
+            </div>
+            <form name="stringInputForm">
+                <input class="form-control main-string-input" name="mainStringInput" type="text" ng-model="inputString"
+                    ng-change="inputChange(inputString)" />
+            </form>
+            <table class="result-array-container table">
+                <thead>
+                    <tr>
+                        <th class="index-col" scope="col">#</th>
+                        <th scope="col" class="function-col">Transformation</th>
+                        <th scope="col">Result</th>
+                        <th scope="col" lass="remove-button">X</th>
 
-                </tr>
-            </thead>
-            <tbody>
-            <tr class = "" ng-repeat = "resultObject in stringResults track by resultObject.id">
-                <th class = "index-col" scope="row">{{ $index }}</th>
-                <td class = "function-col">{{resultObject.function}}</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="" ng-repeat="resultObject in stringResults track by resultObject.id">
+                        <th class="index-col" scope="row">{{ $index }}</th>
+                        <td class="function-col">{{resultObject.description}}</td>
 
-                <td class = "">{{resultObject.string}}</td>
-            </tr>
-            </tbody>
-        </ul>
+                        <td class=""><span class="result-string">{{ resultObject.toString() }}</span></td>
+                        <td class="remove-button">
+                            <span class = "btn-span" ng-if="$index > 0" data-remove-button="{{ $index }}"
+                                ng-click="removeTransform($index)">
+                                X
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-lg-6">
+
+            <p class="alert alert-info">
+                Use this interface to apply transformations to the string.  After you have 
+                created a sequence of transforms, you can change the input string and 
+                the entire table will be live-updated.
+            </p>
+            <div class="main-btn-group-outer form-group card">
+                <div class="card-body">
+                    <div>
+                        <label>Elementary Transformations</label>
+                    </div>
+                    <button ng-disabled="stringInputForm.mainStringInput.$pristine"
+                        class="btn btn-primary remove-duplicated-button"
+                        ng-click="removeDuplicated(stringResults[stringResults.length - 1].string)">
+                        remove duplicated
+                    </button>
+                    <button ng-disabled="stringInputForm.mainStringInput.$pristine" class="btn btn-primary 
+                        reverse-string-button" ng-click="reverseString(stringResults[stringResults.length - 1].string)">
+                        reverse string
+                    </button>
+                    <button ng-disabled="stringInputForm.mainStringInput.$pristine" class="btn btn-primary 
+                    remove-spaces-button" ng-click="removeSpaces(stringResults[stringResults.length - 1].string)">
+                        remove spaces
+                    </button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <label>Substring Replace</label>
+                    <div class=" form-group">
+                        <label for="replaceSubstring">search substring</label>
+                        <input type="text" name="replaceSubstring" ng-model="replaceSubstring"
+                            class="replace-substring-input form-control" />
+                        <label for="newSubstring">new substring</label>
+                        <input type="text" name="newSubstring" ng-model="newSubstring"
+                            class="new-substring-input form-control" />
+                        <button class="replace-substring-button form-control btn btn-primary"
+                            ng-click="replaceSubstringAll(replaceSubstring, newSubstring)(inputString)"
+                            ng-disabled="!(replaceSubstring.length > 0)">
+                            replace
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 `
 },{}],3:[function(require,module,exports){
 let template = require("./manipulate-strings-template").template;
 require("./manipulate-strings-service.js");
 
+let id = 0;
+let Transform = function(previous, description, transformFunction, value) {
+    this.id = id++;
+    this.previous = previous;
+    this.description = description;
+    this.transform = transformFunction;
+    this.toString = ()=> {return this.previous ? this.transform(this.previous.toString()) : value}
+}
+
+
 angular.module("manipulateStringsApp", ["manipulateStringsMod"])
 .directive("manipulateStrings", ["manipulateStringsService", function(manipulateStringsService) {
     return {
         template: template,
+        //templateUrl : "/manipulate-strings-template.html",
         controller : ["$scope", function($scope) {
-            let id = 1;
             $scope.inputString = "";
             $scope.stringResults = [];
+            $scope.replaceSubstring = "";
+            $scope.newSubstring = "";
             $scope.inputChange = function(inputString) {
-                $scope.stringResults = [{
-                    id : id++,
-                    function: "init",
-                    string : inputString
-                }];
+                let transform = new Transform(null, "init", (x)=>x, inputString);
+
+                $scope.stringResults[0] = transform;
+                if ($scope.stringResults[1]) {
+                    $scope.stringResults[1].previous = transform;
+                }
+
             }
-            $scope.removeDuplicated = function(str) {
-                let result = {
-                    id : id++,
-                    string: manipulateStringsService.removeDuplicated(str),
-                    function : "removeDuplicated"
-                };
-                $scope.stringResults.push(result);
+            $scope.removeDuplicated = function() {
+                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],"remove duplicated", (x) => manipulateStringsService.removeDuplicated(x));
+                $scope.stringResults.push(transform);
             }
-            $scope.reverseString = function(str) {
-                $scope.stringResults.push({
-                    id : id++,
-                    string: manipulateStringsService.reverse(str),
-                    function : "reverseString"
-                })
+            $scope.reverseString = function() {
+                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1], "reverse", (x) => manipulateStringsService.reverse(x));
+                $scope.stringResults.push(transform);
             }
-            $scope.removeSpaces = function(str) {
-                $scope.stringResults.push({
-                    id : id++,
-                    string: manipulateStringsService.removeSpaces(str),
-                    function : "removeSpaces"
-                })
+            $scope.removeSpaces = function() {
+                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1], "remove spaces", (x) => manipulateStringsService.removeSpaces(x));
+                $scope.stringResults.push(transform);
             }
+            $scope.replaceSubstringAll = function(substring, newSubstring) {
+                let transformFunc = (x)=>manipulateStringsService.replaceSubstringAll(substring, newSubstring)(x);
+                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],`replace all ${substring} with ${newSubstring}`, transformFunc);
+                $scope.stringResults.push(transform);
+            }
+            $scope.removeTransform = function(index) {
+                if (index < 1 || index >= $scope.stringResults.length) {
+                    throw new Error("index out of bounds");
+                }
+                if (index + 1 < $scope.stringResults.length) {
+                    $scope.stringResults[index + 1].previous = $scope.stringResults[index - 1];
+                }
+                $scope.stringResults.splice(index, 1);
+            }
+
         }]
     }
 } ] )

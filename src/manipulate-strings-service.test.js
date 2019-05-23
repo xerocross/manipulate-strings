@@ -74,4 +74,35 @@ describe("mutateStringService",() => {
         let expectedResult = "applepie"
         expect(service.removeSpaces(testString)).toBe(expectedResult);
     })
+
+    it("replaces substrings (multiple found)",function() {
+        let testString = "appleappleappleapple";
+        let substring = "ea";
+        let newSubstring = "e a";
+        let expectedResult = "apple apple apple apple"
+        expect(service.replaceSubstringAll(substring, newSubstring)(testString)).toBe(expectedResult);
+    })
+
+    it("replaces substrings (none found",function() {
+        let testString = "appleappleappleapple";
+        let substring = "qat";
+        let newSubstring = "bear";
+        let expectedResult = testString;
+        expect(service.replaceSubstringAll(substring, newSubstring)(testString)).toBe(expectedResult);
+    })
+
+    it("replaces substrings (one found)",function() {
+        let testString = "appleqatappleappleapple";
+        let substring = "qat";
+        let newSubstring = "bear";
+        let expectedResult = "applebearappleappleapple";
+        expect(service.replaceSubstringAll(substring, newSubstring)(testString)).toBe(expectedResult);
+    })
+
+    it("replaces substrings without an inf loop",function() {
+        let testString = "ratatat";
+        let substring = "a";
+        let newSubstring = "bat";
+        expect(service.replaceSubstringAll(substring, newSubstring)(testString)).toBe("rbattbattbatt");
+    })
 })

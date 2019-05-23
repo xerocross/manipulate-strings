@@ -1,11 +1,15 @@
+body {
+    font-size: 14pt;
+}
+label {
+    font-size: 110%;
+}
 .function-name-display {
     min-width: 5em;
 }
 
 .main-btn-group-outer {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    text-align: center;
+
 }
 
 .index-col {
@@ -13,4 +17,25 @@
 }
 .function-col {
     width: 30%;
+}
+.form-group {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.inter-word {
+    padding-left: 10px;
+    padding-right:10px;
+}
+.btn.btn-primary {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.remove-button {
+    width : 2em;
+}
+
+.btn-span:hover {
+    text-decoration: underline;
+    font-weight: bold;
+    cursor: pointer;
 }

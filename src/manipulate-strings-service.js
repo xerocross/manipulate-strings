@@ -47,6 +47,24 @@ angular.module("manipulateStringsMod", [])
         }
         return resultArray.toString();
     }
+    this.replaceSubstringAll = function(substring, newSubstring) {
+        return (str) => {
+            let i = 0;
+            let len = substring.length;
+            let remaining = str.substring(i);
+            let frontpart = "";
+            while (i = remaining.indexOf(substring), i > -1) {
+                // split into front working part and the new remaining
+                let workingPart = remaining.substring(0 , i+ len);
+                // append the workingPart and make the substitution
+                frontpart += workingPart.replace(substring, newSubstring);
+                // cut the remaining to exclude the current working part
+                remaining = remaining.substring(i + len);
+            }
+            frontpart += remaining;
+            return frontpart;
+        }
+    }
     this.removeSpaces = function(str) {
         return this.removeSubstringAll(str, " ");
     }
