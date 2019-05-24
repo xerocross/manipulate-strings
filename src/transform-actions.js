@@ -12,3 +12,9 @@ module.exports.getAddTransformAction = function (description, transformFunction)
         transformFunction: transformFunction,
     }
 }
+module.exports.getSetInitialValueAction = function (val) {
+    return {
+        type: "SET_INIT",
+        value : val
+    }
+}

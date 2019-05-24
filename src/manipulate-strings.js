@@ -6,11 +6,10 @@ let transformReducerApp = require("./transform-reducer").transformReducerApp;
 
 let template = require("./manipulate-strings-template").template;
 require("./manipulate-strings-service.js");
-let Transform = require("./Transform");
 angular.module("manipulateStringsApp", ["manipulateStringsMod"])
 require("./transform-list.js");
 
-let getRemoveTransformAction = require("./transform-actions.js").getRemoveTransformAction;
+let StoreActions = require("./transform-actions.js");
 
 
 
@@ -51,76 +50,45 @@ angular.module("manipulateStringsApp")
             $scope.selectedTransform = $scope.transformOptions[0].id;
 
             $scope.inputChange = function(inputString) {
-                let transform = new Transform(null, "init", (x)=>x, inputString);
-
-                $scope.stringResults[0] = transform;
-                if ($scope.stringResults[1]) {
-                    $scope.stringResults[1].previous = transform;
-                }
-
+                $scope.store.dispatch(StoreActions.getSetInitialValueAction(inputString));
             }
             $scope.removeDuplicated = function() {
-                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],"remove duplicated", (x) => manipulateStringsService.removeDuplicated(x));
-                $scope.stringResults.push(transform);
+                // let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],"remove duplicated", (x) => manipulateStringsService.removeDuplicated(x));
+                // $scope.stringResults.push(transform);
+                let transformFunc =  (x) => manipulateStringsService.removeDuplicated(x)
+                let description = "remove duplicated"
+                $scope.store.dispatch(StoreActions.getAddTransformAction(description, transformFunc));
             }
             $scope.reverseString = function() {
-                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1], "reverse", (x) => manipulateStringsService.reverse(x));
-                $scope.stringResults.push(transform);
+                let transformFunc =  (x) => manipulateStringsService.reverse(x)
+                let description = "reverse"
+                $scope.store.dispatch(StoreActions.getAddTransformAction(description, transformFunc));
             }
             $scope.removeSpaces = function() {
-                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1], "remove spaces", (x) => manipulateStringsService.removeSpaces(x));
-                $scope.stringResults.push(transform);
+                let transformFunc =  (x) => manipulateStringsService.removeSpaces(x)
+                let description = "remove spaces"
+                $scope.store.dispatch(StoreActions.getAddTransformAction(description, transformFunc));
             }
             $scope.replaceSubstringAll = function(substring, newSubstring) {
                 let transformFunc = (x)=>manipulateStringsService.replaceSubstringAll(substring, newSubstring)(x);
-                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],`replace all ${substring} with ${newSubstring}`, transformFunc);
-                $scope.stringResults.push(transform);
+                let description = `replace all ${substring} with ${newSubstring}`;
+                $scope.store.dispatch(StoreActions.getAddTransformAction(description, transformFunc));
+
             }
             $scope.alphabatize = function() {
                 let transformFunc = (x)=>manipulateStringsService.alphabatize(x);
-                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],`alphabatize`, transformFunc);
-                $scope.stringResults.push(transform);
-            
+                $scope.store.dispatch(StoreActions.getAddTransformAction(`alphabatize`, transformFunc));
             }
-            $scope.removeTransform = function(index) {
-                this.store.dispatch(getRemoveTransformAction(index));
-                // let elts = $($element).find('[data-toggle="tooltip"]');
-                // elts.tooltip('dispose');
-                // if (index < 1 || index >= $scope.stringResults.length) {
-                //     throw new Error("index out of bounds");
-                // }
-                // if ($window.confirm("Delete this transform?")) {
-                //     if (index + 1 < $scope.stringResults.length) {
-                //         $scope.stringResults[index + 1].previous = $scope.stringResults[index - 1];
-                //     }
-                //     $scope.stringResults.splice(index, 1);
-                // }
+            $scope.removeTransform = (index) => {
+                $scope.store.dispatch(StoreActions.getRemoveTransformAction(index));
             }
-            $scope.$watch("stringResults", function() {
-                $timeout(()=>{
-                    let elts = $($element).find('[data-toggle="tooltip"]');
-                    elts.tooltip();
-                }, 0)
-                // this is a hack to queue this action
-                // after the dom has updated
-            }, true);
-
-            
 
             this.$onInit = function() {
                 $scope.store = createStore(transformReducerApp);
-                //stringResults
-
                 $scope.store.subscribe(() => {
-                    let state = this.store.getState();
+                    let state = $scope.store.getState();
                     $scope.stringResults = state.transformList;
-
-                    this.updateStorage(state);
-                    this.setState(()=> {return this.updateFromState(state)});
                 });
-
-
-
                 $($element).find('[data-toggle="tooltip"]').tooltip()
             }
             

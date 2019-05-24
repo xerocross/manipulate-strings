@@ -12,7 +12,7 @@ module.exports.template = `
                     Initial String
                 </label>
             </div>
-            <form name="stringInputForm" data-toggle="tooltip" data-placement="top" title="you can change the input text at any time">
+            <form name="stringInputForm" data-toggle="tooltip" data-placement="top" title="change text to pipe it through the transforms below">
                 <input class="form-control main-string-input" name="mainStringInput" type="text" ng-model="inputString"
                     ng-change="inputChange(inputString)" />
             </form>
@@ -20,6 +20,7 @@ module.exports.template = `
             <transform-list 
                 transform-array = "stringResults"
                 remove-transform-function = "removeTransform"
+                
             ></transform-list>
 
 

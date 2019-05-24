@@ -905,6 +905,9 @@ module.exports = class Transform {
     toString () {
         return this.previous ? this.transform(this.previous.toString()) : this.value
     }
+    getClone () {
+        return new Transform(this.previous, this.description, this.transform, this.value);
+    }
 }
 },{}],6:[function(require,module,exports){
 angular.module("manipulateStringsMod", [])
@@ -996,7 +999,7 @@ module.exports.template = `
                     Initial String
                 </label>
             </div>
-            <form name="stringInputForm" data-toggle="tooltip" data-placement="top" title="you can change the input text at any time">
+            <form name="stringInputForm" data-toggle="tooltip" data-placement="top" title="change text to pipe it through the transforms below">
                 <input class="form-control main-string-input" name="mainStringInput" type="text" ng-model="inputString"
                     ng-change="inputChange(inputString)" />
             </form>
@@ -1004,6 +1007,7 @@ module.exports.template = `
             <transform-list 
                 transform-array = "stringResults"
                 remove-transform-function = "removeTransform"
+                
             ></transform-list>
 
 
@@ -1081,11 +1085,10 @@ let transformReducerApp = require("./transform-reducer").transformReducerApp;
 
 let template = require("./manipulate-strings-template").template;
 require("./manipulate-strings-service.js");
-let Transform = require("./Transform");
 angular.module("manipulateStringsApp", ["manipulateStringsMod"])
 require("./transform-list.js");
 
-let getRemoveTransformAction = require("./transform-actions.js").getRemoveTransformAction;
+let StoreActions = require("./transform-actions.js");
 
 
 
@@ -1126,83 +1129,52 @@ angular.module("manipulateStringsApp")
             $scope.selectedTransform = $scope.transformOptions[0].id;
 
             $scope.inputChange = function(inputString) {
-                let transform = new Transform(null, "init", (x)=>x, inputString);
-
-                $scope.stringResults[0] = transform;
-                if ($scope.stringResults[1]) {
-                    $scope.stringResults[1].previous = transform;
-                }
-
+                $scope.store.dispatch(StoreActions.getSetInitialValueAction(inputString));
             }
             $scope.removeDuplicated = function() {
-                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],"remove duplicated", (x) => manipulateStringsService.removeDuplicated(x));
-                $scope.stringResults.push(transform);
+                // let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],"remove duplicated", (x) => manipulateStringsService.removeDuplicated(x));
+                // $scope.stringResults.push(transform);
+                let transformFunc =  (x) => manipulateStringsService.removeDuplicated(x)
+                let description = "remove duplicated"
+                $scope.store.dispatch(StoreActions.getAddTransformAction(description, transformFunc));
             }
             $scope.reverseString = function() {
-                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1], "reverse", (x) => manipulateStringsService.reverse(x));
-                $scope.stringResults.push(transform);
+                let transformFunc =  (x) => manipulateStringsService.reverse(x)
+                let description = "reverse"
+                $scope.store.dispatch(StoreActions.getAddTransformAction(description, transformFunc));
             }
             $scope.removeSpaces = function() {
-                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1], "remove spaces", (x) => manipulateStringsService.removeSpaces(x));
-                $scope.stringResults.push(transform);
+                let transformFunc =  (x) => manipulateStringsService.removeSpaces(x)
+                let description = "remove spaces"
+                $scope.store.dispatch(StoreActions.getAddTransformAction(description, transformFunc));
             }
             $scope.replaceSubstringAll = function(substring, newSubstring) {
                 let transformFunc = (x)=>manipulateStringsService.replaceSubstringAll(substring, newSubstring)(x);
-                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],`replace all ${substring} with ${newSubstring}`, transformFunc);
-                $scope.stringResults.push(transform);
+                let description = `replace all ${substring} with ${newSubstring}`;
+                $scope.store.dispatch(StoreActions.getAddTransformAction(description, transformFunc));
+
             }
             $scope.alphabatize = function() {
                 let transformFunc = (x)=>manipulateStringsService.alphabatize(x);
-                let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],`alphabatize`, transformFunc);
-                $scope.stringResults.push(transform);
-            
+                $scope.store.dispatch(StoreActions.getAddTransformAction(`alphabatize`, transformFunc));
             }
-            $scope.removeTransform = function(index) {
-                this.store.dispatch(getRemoveTransformAction(index));
-                // let elts = $($element).find('[data-toggle="tooltip"]');
-                // elts.tooltip('dispose');
-                // if (index < 1 || index >= $scope.stringResults.length) {
-                //     throw new Error("index out of bounds");
-                // }
-                // if ($window.confirm("Delete this transform?")) {
-                //     if (index + 1 < $scope.stringResults.length) {
-                //         $scope.stringResults[index + 1].previous = $scope.stringResults[index - 1];
-                //     }
-                //     $scope.stringResults.splice(index, 1);
-                // }
+            $scope.removeTransform = (index) => {
+                $scope.store.dispatch(StoreActions.getRemoveTransformAction(index));
             }
-            $scope.$watch("stringResults", function() {
-                $timeout(()=>{
-                    let elts = $($element).find('[data-toggle="tooltip"]');
-                    elts.tooltip();
-                }, 0)
-                // this is a hack to queue this action
-                // after the dom has updated
-            }, true);
-
-            
 
             this.$onInit = function() {
                 $scope.store = createStore(transformReducerApp);
-                //stringResults
-
                 $scope.store.subscribe(() => {
-                    let state = this.store.getState();
+                    let state = $scope.store.getState();
                     $scope.stringResults = state.transformList;
-
-                    this.updateStorage(state);
-                    this.setState(()=> {return this.updateFromState(state)});
                 });
-
-
-
                 $($element).find('[data-toggle="tooltip"]').tooltip()
             }
             
         }]
     }
 }])
-},{"./Transform":5,"./manipulate-strings-service.js":6,"./manipulate-strings-template":7,"./transform-actions.js":9,"./transform-list.js":10,"./transform-reducer":11,"redux":2}],9:[function(require,module,exports){
+},{"./manipulate-strings-service.js":6,"./manipulate-strings-template":7,"./transform-actions.js":9,"./transform-list.js":10,"./transform-reducer":11,"redux":2}],9:[function(require,module,exports){
 module.exports.getRemoveTransformAction = function(index) {
     return {
         type: "REMOVE_TRANSFORM",
@@ -1217,6 +1189,12 @@ module.exports.getAddTransformAction = function (description, transformFunction)
         transformFunction: transformFunction,
     }
 }
+module.exports.getSetInitialValueAction = function (val) {
+    return {
+        type: "SET_INIT",
+        value : val
+    }
+}
 },{}],10:[function(require,module,exports){
 const template = `
 <div>
@@ -1225,7 +1203,7 @@ const template = `
         <thead>
             <tr>
                 <th class="index-col" scope="col">#</th>
-                <th scope="col" class="function-col">Transformation</th>
+                <th scope="col" class="function-col">Transform</th>
                 <th scope="col">Result</th>
                 <th scope="col" lass="remove-button">Delete</th>
             </tr>
@@ -1237,10 +1215,10 @@ const template = `
                 <td class=""><span class="result-string">{{ transform.toString() }}</span></td>
                 <td class="remove-button">
                     <span class = "btn-span" ng-if="$index > 0" data-remove-button="{{ $index }}"
-                        ng-click="removeTransform($index)"
+                        ng-click="removeItem($index)"
                         data-toggle="tooltip"
                         data-placement="top" 
-                        title="remove just this transform from the sequence"    
+                        title="remove this transform; the others will be unaffected"    
                     >
                         delete
                     </span>
@@ -1255,19 +1233,30 @@ angular.module("manipulateStringsApp")
     return {
         template : template,
         restrict : "E",
+        bindToController: {
+            transformArray: "<"
+        },
         scope: {
             transformArray: "<",
             removeTransformFunction: "<"
         },
-        controller : function() {
+        controller : ["$scope", "$element", "$timeout", function($scope, $element, $timeout) {
             this.$onChanges = function () {
-                console.log("onchange");
+                $timeout(()=> {
+                    console.log("adding tooltips");
+                    $($element).find('[data-toggle="tooltip"]').tooltip();
+                }, 0);
             }
-            
-        }
+            $scope.removeItem = (index) => {
+                console.log("disposing tooltips");
+                $($element).find('[data-toggle="tooltip"]').tooltip("dispose");
+                $scope.removeTransformFunction(index);
+            }
+        }]
     }
 });
 },{}],11:[function(require,module,exports){
+/* eslint-disable no-case-declarations */
 
 let Transform = require("./Transform");
 
@@ -1276,20 +1265,25 @@ let Transform = require("./Transform");
 var cloneTransformList = function(list) {
     let clone = [];
     for (let i = 0; i < list.length; i++) {
-        clone.push(list[i]);
+        let cloneTransform = list[i].getClone();
+        clone.push(cloneTransform);
+        if (i > 0) {
+            cloneTransform.previous = clone[i-1]
+        }
     }
     return clone;
 }
 
 var cloneState = function(state) {
-    cloneTransformList(state.transformList);
+    return {
+        transformList : cloneTransformList(state.transformList)
+    }
 }
 
 const init = {
     transformList : []
 }
 module.exports.transformReducerApp = function(state, action) {
-
     if (typeof state == "undefined") {
         return init;
     }
@@ -1307,7 +1301,16 @@ module.exports.transformReducerApp = function(state, action) {
                 previous = newState.transformList[len - 1];
             }
             newState.transformList.push(new Transform(previous, action.description, action.transformFunction))
-
+            break;
+        case "SET_INIT":
+            let transform = new Transform(null, "reflect", x => x, action.value);
+            newState.transformList[0] = transform;
+            if (newState.transformList[1]) {
+                newState.transformList[1].previous = transform;
+            }
+            break;
+        default:
+            break;
     }
     return newState;
 }

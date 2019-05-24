@@ -11,4 +11,7 @@ module.exports = class Transform {
     toString () {
         return this.previous ? this.transform(this.previous.toString()) : this.value
     }
+    getClone () {
+        return new Transform(this.previous, this.description, this.transform, this.value);
+    }
 }

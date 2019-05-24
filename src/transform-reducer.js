@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 
 let Transform = require("./Transform");
 
@@ -6,20 +7,25 @@ let Transform = require("./Transform");
 var cloneTransformList = function(list) {
     let clone = [];
     for (let i = 0; i < list.length; i++) {
-        clone.push(list[i]);
+        let cloneTransform = list[i].getClone();
+        clone.push(cloneTransform);
+        if (i > 0) {
+            cloneTransform.previous = clone[i-1]
+        }
     }
     return clone;
 }
 
 var cloneState = function(state) {
-    cloneTransformList(state.transformList);
+    return {
+        transformList : cloneTransformList(state.transformList)
+    }
 }
 
 const init = {
     transformList : []
 }
 module.exports.transformReducerApp = function(state, action) {
-
     if (typeof state == "undefined") {
         return init;
     }
@@ -37,7 +43,16 @@ module.exports.transformReducerApp = function(state, action) {
                 previous = newState.transformList[len - 1];
             }
             newState.transformList.push(new Transform(previous, action.description, action.transformFunction))
-
+            break;
+        case "SET_INIT":
+            let transform = new Transform(null, "reflect", x => x, action.value);
+            newState.transformList[0] = transform;
+            if (newState.transformList[1]) {
+                newState.transformList[1].previous = transform;
+            }
+            break;
+        default:
+            break;
     }
     return newState;
 }

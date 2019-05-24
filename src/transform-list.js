@@ -5,7 +5,7 @@ const template = `
         <thead>
             <tr>
                 <th class="index-col" scope="col">#</th>
-                <th scope="col" class="function-col">Transformation</th>
+                <th scope="col" class="function-col">Transform</th>
                 <th scope="col">Result</th>
                 <th scope="col" lass="remove-button">Delete</th>
             </tr>
@@ -17,10 +17,10 @@ const template = `
                 <td class=""><span class="result-string">{{ transform.toString() }}</span></td>
                 <td class="remove-button">
                     <span class = "btn-span" ng-if="$index > 0" data-remove-button="{{ $index }}"
-                        ng-click="removeTransform($index)"
+                        ng-click="removeItem($index)"
                         data-toggle="tooltip"
                         data-placement="top" 
-                        title="remove just this transform from the sequence"    
+                        title="remove this transform; the others will be unaffected"    
                     >
                         delete
                     </span>
@@ -35,15 +35,25 @@ angular.module("manipulateStringsApp")
     return {
         template : template,
         restrict : "E",
+        bindToController: {
+            transformArray: "<"
+        },
         scope: {
             transformArray: "<",
             removeTransformFunction: "<"
         },
-        controller : function() {
+        controller : ["$scope", "$element", "$timeout", function($scope, $element, $timeout) {
             this.$onChanges = function () {
-                console.log("onchange");
+                $timeout(()=> {
+                    console.log("adding tooltips");
+                    $($element).find('[data-toggle="tooltip"]').tooltip();
+                }, 0);
             }
-            
-        }
+            $scope.removeItem = (index) => {
+                console.log("disposing tooltips");
+                $($element).find('[data-toggle="tooltip"]').tooltip("dispose");
+                $scope.removeTransformFunction(index);
+            }
+        }]
     }
 });
