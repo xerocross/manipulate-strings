@@ -1269,6 +1269,8 @@ angular.module("manipulateStringsApp")
 });
 },{}],11:[function(require,module,exports){
 
+let Transform = require("./Transform");
+
 
 // makes a shallow copy
 var cloneTransformList = function(list) {
@@ -1292,12 +1294,21 @@ module.exports.transformReducerApp = function(state, action) {
         return init;
     }
     let newState = cloneState(state);
-
     switch (action.type) {
         case "REMOVE_TRANSFORM":
             newState.transformList.splice(action.index, 1);
             break;
+        case "ADD_TRANSFORM":
+            let len = newState.transformList.length;
+            let previous;
+            if (len == 0) {
+                previous = null
+            } else {
+                previous = newState.transformList[len - 1];
+            }
+            newState.transformList.push(new Transform(previous, action.description, action.transformFunction))
+
     }
     return newState;
 }
-},{}]},{},[8]);
+},{"./Transform":5}]},{},[8]);
