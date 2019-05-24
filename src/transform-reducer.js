@@ -1,22 +1,22 @@
 /* eslint-disable no-case-declarations */
-
 let Transform = require("./Transform");
-
-
-// makes a shallow copy
-var cloneTransformList = function(list) {
-    let clone = [];
-    for (let i = 0; i < list.length; i++) {
-        let cloneTransform = list[i].getClone();
-        clone.push(cloneTransform);
-        if (i > 0) {
-            cloneTransform.previous = clone[i-1]
-        }
+// clone in a specific way
+// for the business logic 
+function cloneTransformList (list) {
+    if (list.length == 0) {
+        return [];
     }
-    return clone;
+    let clonedList = [];
+    clonedList.push(list[0].getClone());
+    for (let i = 1; i < list.length; i++) {
+        let cloneTransform = list[i].getClone();
+        cloneTransform.previous = clonedList[i-1]
+        clonedList.push(cloneTransform);
+    }
+    return clonedList;
 }
 
-var cloneState = function(state) {
+function cloneState (state) {
     return {
         transformList : cloneTransformList(state.transformList)
     }
@@ -32,7 +32,12 @@ module.exports.transformReducerApp = function(state, action) {
     let newState = cloneState(state);
     switch (action.type) {
         case "REMOVE_TRANSFORM":
+            let deadTransform = newState.transformList[action.index];
+            if (action.index + 1 < newState.transformList.length) {
+                newState.transformList[action.index + 1].previous = deadTransform.previous;
+            }
             newState.transformList.splice(action.index, 1);
+
             break;
         case "ADD_TRANSFORM":
             let len = newState.transformList.length;

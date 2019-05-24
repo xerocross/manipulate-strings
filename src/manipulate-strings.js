@@ -1,8 +1,5 @@
-
-
 let createStore = require("redux").createStore;
 let transformReducerApp = require("./transform-reducer").transformReducerApp;
-
 
 let template = require("./manipulate-strings-template").template;
 require("./manipulate-strings-service.js");
@@ -11,9 +8,6 @@ require("./transform-list.js");
 
 let StoreActions = require("./transform-actions.js");
 
-
-
-
 angular.module("manipulateStringsApp")
 .directive("manipulateStrings", ["manipulateStringsService", function(manipulateStringsService) {
     return {
@@ -21,7 +15,7 @@ angular.module("manipulateStringsApp")
         template: template,
         controller : ["$scope", "$element", "$timeout", "$window", function($scope, $element, $timeout, $window) {
             $scope.inputString = "";
-            $scope.stringResults = [];
+            $scope.transformList = [];
             $scope.replaceSubstring = "";
             $scope.newSubstring = "";
            
@@ -53,8 +47,6 @@ angular.module("manipulateStringsApp")
                 $scope.store.dispatch(StoreActions.getSetInitialValueAction(inputString));
             }
             $scope.removeDuplicated = function() {
-                // let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],"remove duplicated", (x) => manipulateStringsService.removeDuplicated(x));
-                // $scope.stringResults.push(transform);
                 let transformFunc =  (x) => manipulateStringsService.removeDuplicated(x)
                 let description = "remove duplicated"
                 $scope.store.dispatch(StoreActions.getAddTransformAction(description, transformFunc));
@@ -87,7 +79,7 @@ angular.module("manipulateStringsApp")
                 $scope.store = createStore(transformReducerApp);
                 $scope.store.subscribe(() => {
                     let state = $scope.store.getState();
-                    $scope.stringResults = state.transformList;
+                    $scope.transformList = state.transformList;
                 });
                 $($element).find('[data-toggle="tooltip"]').tooltip()
             }

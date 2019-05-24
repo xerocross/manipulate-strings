@@ -6,7 +6,7 @@ const template = `
             <tr>
                 <th class="index-col" scope="col">#</th>
                 <th scope="col" class="function-col">Transform</th>
-                <th scope="col">Result</th>
+                <th scope="col" class="result-string-box">Result</th>
                 <th scope="col" lass="remove-button">Delete</th>
             </tr>
         </thead>
@@ -14,7 +14,7 @@ const template = `
             <tr class="" ng-repeat="transform in transformArray track by transform.id">
                 <th class="index-col" scope="row">{{ $index }}</th>
                 <td class="function-col">{{transform.description}}</td>
-                <td class=""><span class="result-string">{{ transform.toString() }}</span></td>
+                <td class="result-string-box"><span class="result-string">{{ transform.toString() }}</span></td>
                 <td class="remove-button">
                     <span class = "btn-span" ng-if="$index > 0" data-remove-button="{{ $index }}"
                         ng-click="removeItem($index)"
@@ -45,12 +45,10 @@ angular.module("manipulateStringsApp")
         controller : ["$scope", "$element", "$timeout", function($scope, $element, $timeout) {
             this.$onChanges = function () {
                 $timeout(()=> {
-                    console.log("adding tooltips");
                     $($element).find('[data-toggle="tooltip"]').tooltip();
                 }, 0);
             }
             $scope.removeItem = (index) => {
-                console.log("disposing tooltips");
                 $($element).find('[data-toggle="tooltip"]').tooltip("dispose");
                 $scope.removeTransformFunction(index);
             }

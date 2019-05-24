@@ -39,3 +39,12 @@ label {
 .tooltip {
     visibility : auto;
 }
+
+td.result-string-box {
+    word-wrap: break-word;
+    width: 50%;
+    word-break: break-all
+}
+span.result-string  {
+
+}

@@ -1005,13 +1005,10 @@ module.exports.template = `
             </form>
             
             <transform-list 
-                transform-array = "stringResults"
+                transform-array = "transformList"
                 remove-transform-function = "removeTransform"
-                
+
             ></transform-list>
-
-
-
         </div>
         <div class="col-lg-6">
 
@@ -1031,27 +1028,27 @@ module.exports.template = `
                     <div ng-show = "selectedTransform == 'alphabetize'">
                         <button ng-disabled="stringInputForm.mainStringInput.$pristine" 
                         class="btn btn-primary alphabatize-string-button" 
-                            ng-click="alphabatize(stringResults[stringResults.length - 1].string)"
+                            ng-click="alphabatize(transformList[transformList.length - 1].string)"
                         >
                             alphabatize
                         </button>
                     </div>
                     <div ng-show = "selectedTransform == 'reverse'">
                         <button ng-disabled="stringInputForm.mainStringInput.$pristine" class="btn btn-primary 
-                            reverse-string-button" ng-click="reverseString(stringResults[stringResults.length - 1].string)">
+                            reverse-string-button" ng-click="reverseString(transformList[transformList.length - 1].string)">
                             reverse string
                         </button>
                     </div>
                     <div ng-show = "selectedTransform == 'nodupes'">
                         <button ng-disabled="stringInputForm.mainStringInput.$pristine"
                             class="btn btn-primary remove-duplicated-button"
-                            ng-click="removeDuplicated(stringResults[stringResults.length - 1].string)">
+                            ng-click="removeDuplicated(transformList[transformList.length - 1].string)">
                             remove chars that appear more than once
                         </button>
                     </div>
                     <div ng-show = "selectedTransform == 'nospace'">
                         <button ng-disabled="stringInputForm.mainStringInput.$pristine" class="btn btn-primary 
-                        remove-spaces-button" ng-click="removeSpaces(stringResults[stringResults.length - 1].string)">
+                        remove-spaces-button" ng-click="removeSpaces(transformList[transformList.length - 1].string)">
                             remove spaces
                         </button>
                     </div>
@@ -1077,11 +1074,8 @@ module.exports.template = `
 </div>
 `
 },{}],8:[function(require,module,exports){
-
-
 let createStore = require("redux").createStore;
 let transformReducerApp = require("./transform-reducer").transformReducerApp;
-
 
 let template = require("./manipulate-strings-template").template;
 require("./manipulate-strings-service.js");
@@ -1090,9 +1084,6 @@ require("./transform-list.js");
 
 let StoreActions = require("./transform-actions.js");
 
-
-
-
 angular.module("manipulateStringsApp")
 .directive("manipulateStrings", ["manipulateStringsService", function(manipulateStringsService) {
     return {
@@ -1100,7 +1091,7 @@ angular.module("manipulateStringsApp")
         template: template,
         controller : ["$scope", "$element", "$timeout", "$window", function($scope, $element, $timeout, $window) {
             $scope.inputString = "";
-            $scope.stringResults = [];
+            $scope.transformList = [];
             $scope.replaceSubstring = "";
             $scope.newSubstring = "";
            
@@ -1132,8 +1123,6 @@ angular.module("manipulateStringsApp")
                 $scope.store.dispatch(StoreActions.getSetInitialValueAction(inputString));
             }
             $scope.removeDuplicated = function() {
-                // let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],"remove duplicated", (x) => manipulateStringsService.removeDuplicated(x));
-                // $scope.stringResults.push(transform);
                 let transformFunc =  (x) => manipulateStringsService.removeDuplicated(x)
                 let description = "remove duplicated"
                 $scope.store.dispatch(StoreActions.getAddTransformAction(description, transformFunc));
@@ -1166,7 +1155,7 @@ angular.module("manipulateStringsApp")
                 $scope.store = createStore(transformReducerApp);
                 $scope.store.subscribe(() => {
                     let state = $scope.store.getState();
-                    $scope.stringResults = state.transformList;
+                    $scope.transformList = state.transformList;
                 });
                 $($element).find('[data-toggle="tooltip"]').tooltip()
             }
@@ -1181,7 +1170,6 @@ module.exports.getRemoveTransformAction = function(index) {
         index : index
     }
 }
-
 module.exports.getAddTransformAction = function (description, transformFunction) {
     return {
         type: "ADD_TRANSFORM",
@@ -1204,7 +1192,7 @@ const template = `
             <tr>
                 <th class="index-col" scope="col">#</th>
                 <th scope="col" class="function-col">Transform</th>
-                <th scope="col">Result</th>
+                <th scope="col" class="result-string-box">Result</th>
                 <th scope="col" lass="remove-button">Delete</th>
             </tr>
         </thead>
@@ -1212,7 +1200,7 @@ const template = `
             <tr class="" ng-repeat="transform in transformArray track by transform.id">
                 <th class="index-col" scope="row">{{ $index }}</th>
                 <td class="function-col">{{transform.description}}</td>
-                <td class=""><span class="result-string">{{ transform.toString() }}</span></td>
+                <td class="result-string-box"><span class="result-string">{{ transform.toString() }}</span></td>
                 <td class="remove-button">
                     <span class = "btn-span" ng-if="$index > 0" data-remove-button="{{ $index }}"
                         ng-click="removeItem($index)"
@@ -1243,12 +1231,10 @@ angular.module("manipulateStringsApp")
         controller : ["$scope", "$element", "$timeout", function($scope, $element, $timeout) {
             this.$onChanges = function () {
                 $timeout(()=> {
-                    console.log("adding tooltips");
                     $($element).find('[data-toggle="tooltip"]').tooltip();
                 }, 0);
             }
             $scope.removeItem = (index) => {
-                console.log("disposing tooltips");
                 $($element).find('[data-toggle="tooltip"]').tooltip("dispose");
                 $scope.removeTransformFunction(index);
             }
@@ -1257,24 +1243,24 @@ angular.module("manipulateStringsApp")
 });
 },{}],11:[function(require,module,exports){
 /* eslint-disable no-case-declarations */
-
 let Transform = require("./Transform");
-
-
-// makes a shallow copy
-var cloneTransformList = function(list) {
-    let clone = [];
-    for (let i = 0; i < list.length; i++) {
-        let cloneTransform = list[i].getClone();
-        clone.push(cloneTransform);
-        if (i > 0) {
-            cloneTransform.previous = clone[i-1]
-        }
+// clone in a specific way
+// for the business logic 
+function cloneTransformList (list) {
+    if (list.length == 0) {
+        return [];
     }
-    return clone;
+    let clonedList = [];
+    clonedList.push(list[0].getClone());
+    for (let i = 1; i < list.length; i++) {
+        let cloneTransform = list[i].getClone();
+        cloneTransform.previous = clonedList[i-1]
+        clonedList.push(cloneTransform);
+    }
+    return clonedList;
 }
 
-var cloneState = function(state) {
+function cloneState (state) {
     return {
         transformList : cloneTransformList(state.transformList)
     }
@@ -1290,7 +1276,12 @@ module.exports.transformReducerApp = function(state, action) {
     let newState = cloneState(state);
     switch (action.type) {
         case "REMOVE_TRANSFORM":
+            let deadTransform = newState.transformList[action.index];
+            if (action.index + 1 < newState.transformList.length) {
+                newState.transformList[action.index + 1].previous = deadTransform.previous;
+            }
             newState.transformList.splice(action.index, 1);
+
             break;
         case "ADD_TRANSFORM":
             let len = newState.transformList.length;

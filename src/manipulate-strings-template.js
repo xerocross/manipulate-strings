@@ -18,13 +18,10 @@ module.exports.template = `
             </form>
             
             <transform-list 
-                transform-array = "stringResults"
+                transform-array = "transformList"
                 remove-transform-function = "removeTransform"
-                
+
             ></transform-list>
-
-
-
         </div>
         <div class="col-lg-6">
 
@@ -44,27 +41,27 @@ module.exports.template = `
                     <div ng-show = "selectedTransform == 'alphabetize'">
                         <button ng-disabled="stringInputForm.mainStringInput.$pristine" 
                         class="btn btn-primary alphabatize-string-button" 
-                            ng-click="alphabatize(stringResults[stringResults.length - 1].string)"
+                            ng-click="alphabatize(transformList[transformList.length - 1].string)"
                         >
                             alphabatize
                         </button>
                     </div>
                     <div ng-show = "selectedTransform == 'reverse'">
                         <button ng-disabled="stringInputForm.mainStringInput.$pristine" class="btn btn-primary 
-                            reverse-string-button" ng-click="reverseString(stringResults[stringResults.length - 1].string)">
+                            reverse-string-button" ng-click="reverseString(transformList[transformList.length - 1].string)">
                             reverse string
                         </button>
                     </div>
                     <div ng-show = "selectedTransform == 'nodupes'">
                         <button ng-disabled="stringInputForm.mainStringInput.$pristine"
                             class="btn btn-primary remove-duplicated-button"
-                            ng-click="removeDuplicated(stringResults[stringResults.length - 1].string)">
+                            ng-click="removeDuplicated(transformList[transformList.length - 1].string)">
                             remove chars that appear more than once
                         </button>
                     </div>
                     <div ng-show = "selectedTransform == 'nospace'">
                         <button ng-disabled="stringInputForm.mainStringInput.$pristine" class="btn btn-primary 
-                        remove-spaces-button" ng-click="removeSpaces(stringResults[stringResults.length - 1].string)">
+                        remove-spaces-button" ng-click="removeSpaces(transformList[transformList.length - 1].string)">
                             remove spaces
                         </button>
                     </div>

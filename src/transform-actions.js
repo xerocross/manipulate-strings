@@ -4,7 +4,6 @@ module.exports.getRemoveTransformAction = function(index) {
         index : index
     }
 }
-
 module.exports.getAddTransformAction = function (description, transformFunction) {
     return {
         type: "ADD_TRANSFORM",

@@ -16,6 +16,8 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'public/jquery-3.4.1.min.js',
+      "public/popper.min.js",
+      "public/bootstrap.min.js",
       "public/angular.js",
       'src/manipulate-strings-service.js',
       'src/manipulate-strings.js',
