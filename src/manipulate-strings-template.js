@@ -16,35 +16,14 @@ module.exports.template = `
                 <input class="form-control main-string-input" name="mainStringInput" type="text" ng-model="inputString"
                     ng-change="inputChange(inputString)" />
             </form>
-            <table class="result-array-container table">
-                <thead>
-                    <tr>
-                        <th class="index-col" scope="col">#</th>
-                        <th scope="col" class="function-col">Transformation</th>
-                        <th scope="col">Result</th>
-                        <th scope="col" lass="remove-button">Delete</th>
+            
+            <transform-list 
+                transform-array = "stringResults"
+                remove-transform-function = "removeTransform"
+            ></transform-list>
 
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="" ng-repeat="resultObject in stringResults track by resultObject.id">
-                        <th class="index-col" scope="row">{{ $index }}</th>
-                        <td class="function-col">{{resultObject.description}}</td>
 
-                        <td class=""><span class="result-string">{{ resultObject.toString() }}</span></td>
-                        <td class="remove-button">
-                            <span class = "btn-span" ng-if="$index > 0" data-remove-button="{{ $index }}"
-                                ng-click="removeTransform($index)"
-                                data-toggle="tooltip"
-                                data-placement="top" 
-                                title="remove just this transform from the sequence"    
-                            >
-                                delete
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+
         </div>
         <div class="col-lg-6">
 

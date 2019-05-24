@@ -1,11 +1,24 @@
+
+
+let createStore = require("redux").createStore;
+let transformReducerApp = require("./transform-reducer").transformReducerApp;
+
+
 let template = require("./manipulate-strings-template").template;
 require("./manipulate-strings-service.js");
-
 let Transform = require("./Transform");
-
 angular.module("manipulateStringsApp", ["manipulateStringsMod"])
+require("./transform-list.js");
+
+let getRemoveTransformAction = require("./transform-actions.js").getRemoveTransformAction;
+
+
+
+
+angular.module("manipulateStringsApp")
 .directive("manipulateStrings", ["manipulateStringsService", function(manipulateStringsService) {
     return {
+
         template: template,
         controller : ["$scope", "$element", "$timeout", "$window", function($scope, $element, $timeout, $window) {
             $scope.inputString = "";
@@ -67,24 +80,25 @@ angular.module("manipulateStringsApp", ["manipulateStringsMod"])
                 let transformFunc = (x)=>manipulateStringsService.alphabatize(x);
                 let transform = new Transform($scope.stringResults[$scope.stringResults.length - 1],`alphabatize`, transformFunc);
                 $scope.stringResults.push(transform);
+            
             }
             $scope.removeTransform = function(index) {
-                let elts = $($element).find('[data-toggle="tooltip"]');
-                elts.tooltip('dispose');
-                if (index < 1 || index >= $scope.stringResults.length) {
-                    throw new Error("index out of bounds");
-                }
-                if ($window.confirm("Delete this transform?")) {
-                    if (index + 1 < $scope.stringResults.length) {
-                        $scope.stringResults[index + 1].previous = $scope.stringResults[index - 1];
-                    }
-                    $scope.stringResults.splice(index, 1);
-                }
+                this.store.dispatch(getRemoveTransformAction(index));
+                // let elts = $($element).find('[data-toggle="tooltip"]');
+                // elts.tooltip('dispose');
+                // if (index < 1 || index >= $scope.stringResults.length) {
+                //     throw new Error("index out of bounds");
+                // }
+                // if ($window.confirm("Delete this transform?")) {
+                //     if (index + 1 < $scope.stringResults.length) {
+                //         $scope.stringResults[index + 1].previous = $scope.stringResults[index - 1];
+                //     }
+                //     $scope.stringResults.splice(index, 1);
+                // }
             }
             $scope.$watch("stringResults", function() {
                 $timeout(()=>{
                     let elts = $($element).find('[data-toggle="tooltip"]');
-                    debugger;
                     elts.tooltip();
                 }, 0)
                 // this is a hack to queue this action
@@ -94,6 +108,19 @@ angular.module("manipulateStringsApp", ["manipulateStringsMod"])
             
 
             this.$onInit = function() {
+                $scope.store = createStore(transformReducerApp);
+                //stringResults
+
+                $scope.store.subscribe(() => {
+                    let state = this.store.getState();
+                    $scope.stringResults = state.transformList;
+
+                    this.updateStorage(state);
+                    this.setState(()=> {return this.updateFromState(state)});
+                });
+
+
+
                 $($element).find('[data-toggle="tooltip"]').tooltip()
             }
             
