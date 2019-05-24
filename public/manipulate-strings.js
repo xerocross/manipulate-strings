@@ -1,4 +1,19 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+let id = 1;
+module.exports = class Transform {
+    constructor(previous, description, transformFunction, value) {
+        this.value = value;
+        this.id = id++;
+        this.previous = previous;
+        this.description = description;
+        this.transform = transformFunction;
+        this.toString = this.toString.bind(this);
+    }
+    toString () {
+        return this.previous ? this.transform(this.previous.toString()) : this.value
+    }
+}
+},{}],2:[function(require,module,exports){
 angular.module("manipulateStringsMod", [])
 .service("manipulateStringsService", function() {
     this.reverse = function(str) {
@@ -73,7 +88,7 @@ angular.module("manipulateStringsMod", [])
         return str.split("").sort().join("");
     }
 });
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 module.exports.template = `
 <div>
     <div class = "row">
@@ -88,7 +103,7 @@ module.exports.template = `
                     Initial String
                 </label>
             </div>
-            <form name="stringInputForm">
+            <form name="stringInputForm" data-toggle="tooltip" data-placement="top" title="you can change the input text at any time">
                 <input class="form-control main-string-input" name="mainStringInput" type="text" ng-model="inputString"
                     ng-change="inputChange(inputString)" />
             </form>
@@ -98,7 +113,7 @@ module.exports.template = `
                         <th class="index-col" scope="col">#</th>
                         <th scope="col" class="function-col">Transformation</th>
                         <th scope="col">Result</th>
-                        <th scope="col" lass="remove-button">X</th>
+                        <th scope="col" lass="remove-button">Delete</th>
 
                     </tr>
                 </thead>
@@ -110,8 +125,12 @@ module.exports.template = `
                         <td class=""><span class="result-string">{{ resultObject.toString() }}</span></td>
                         <td class="remove-button">
                             <span class = "btn-span" ng-if="$index > 0" data-remove-button="{{ $index }}"
-                                ng-click="removeTransform($index)">
-                                X
+                                ng-click="removeTransform($index)"
+                                data-toggle="tooltip"
+                                data-placement="top" 
+                                title="remove just this transform from the sequence"    
+                            >
+                                delete
                             </span>
                         </td>
                     </tr>
@@ -181,31 +200,22 @@ module.exports.template = `
     </div>
 </div>
 `
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 let template = require("./manipulate-strings-template").template;
 require("./manipulate-strings-service.js");
 
-let id = 0;
-let Transform = function(previous, description, transformFunction, value) {
-    this.id = id++;
-    this.previous = previous;
-    this.description = description;
-    this.transform = transformFunction;
-    this.toString = ()=> {return this.previous ? this.transform(this.previous.toString()) : value}
-}
-
+let Transform = require("./Transform");
 
 angular.module("manipulateStringsApp", ["manipulateStringsMod"])
 .directive("manipulateStrings", ["manipulateStringsService", function(manipulateStringsService) {
     return {
         template: template,
-        //templateUrl : "/manipulate-strings-template.html",
-        controller : ["$scope", function($scope) {
+        controller : ["$scope", "$element", "$timeout", "$window", function($scope, $element, $timeout, $window) {
             $scope.inputString = "";
             $scope.stringResults = [];
             $scope.replaceSubstring = "";
             $scope.newSubstring = "";
-            $scope.selectedTransform = "alphabetize";
+           
             $scope.transformOptions = [
                 {
                     title: "alphabetize",
@@ -228,6 +238,8 @@ angular.module("manipulateStringsApp", ["manipulateStringsMod"])
                     id : "replaceSubstring"
                 }
             ];
+            $scope.selectedTransform = $scope.transformOptions[0].id;
+
             $scope.inputChange = function(inputString) {
                 let transform = new Transform(null, "init", (x)=>x, inputString);
 
@@ -260,16 +272,35 @@ angular.module("manipulateStringsApp", ["manipulateStringsMod"])
                 $scope.stringResults.push(transform);
             }
             $scope.removeTransform = function(index) {
+                let elts = $($element).find('[data-toggle="tooltip"]');
+                elts.tooltip('dispose');
                 if (index < 1 || index >= $scope.stringResults.length) {
                     throw new Error("index out of bounds");
                 }
-                if (index + 1 < $scope.stringResults.length) {
-                    $scope.stringResults[index + 1].previous = $scope.stringResults[index - 1];
+                if ($window.confirm("Delete this transform?")) {
+                    if (index + 1 < $scope.stringResults.length) {
+                        $scope.stringResults[index + 1].previous = $scope.stringResults[index - 1];
+                    }
+                    $scope.stringResults.splice(index, 1);
                 }
-                $scope.stringResults.splice(index, 1);
             }
+            $scope.$watch("stringResults", function() {
+                $timeout(()=>{
+                    let elts = $($element).find('[data-toggle="tooltip"]');
+                    debugger;
+                    elts.tooltip();
+                }, 0)
+                // this is a hack to queue this action
+                // after the dom has updated
+            }, true);
 
+            
+
+            this.$onInit = function() {
+                $($element).find('[data-toggle="tooltip"]').tooltip()
+            }
+            
         }]
     }
-} ] )
-},{"./manipulate-strings-service.js":1,"./manipulate-strings-template":2}]},{},[3]);
+}])
+},{"./Transform":1,"./manipulate-strings-service.js":2,"./manipulate-strings-template":3}]},{},[4]);

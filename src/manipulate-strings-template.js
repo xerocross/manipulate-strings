@@ -12,7 +12,7 @@ module.exports.template = `
                     Initial String
                 </label>
             </div>
-            <form name="stringInputForm">
+            <form name="stringInputForm" data-toggle="tooltip" data-placement="top" title="you can change the input text at any time">
                 <input class="form-control main-string-input" name="mainStringInput" type="text" ng-model="inputString"
                     ng-change="inputChange(inputString)" />
             </form>
@@ -22,7 +22,7 @@ module.exports.template = `
                         <th class="index-col" scope="col">#</th>
                         <th scope="col" class="function-col">Transformation</th>
                         <th scope="col">Result</th>
-                        <th scope="col" lass="remove-button">X</th>
+                        <th scope="col" lass="remove-button">Delete</th>
 
                     </tr>
                 </thead>
@@ -34,8 +34,12 @@ module.exports.template = `
                         <td class=""><span class="result-string">{{ resultObject.toString() }}</span></td>
                         <td class="remove-button">
                             <span class = "btn-span" ng-if="$index > 0" data-remove-button="{{ $index }}"
-                                ng-click="removeTransform($index)">
-                                X
+                                ng-click="removeTransform($index)"
+                                data-toggle="tooltip"
+                                data-placement="top" 
+                                title="remove just this transform from the sequence"    
+                            >
+                                delete
                             </span>
                         </td>
                     </tr>

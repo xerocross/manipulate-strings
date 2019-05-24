@@ -8,10 +8,6 @@ label {
     min-width: 5em;
 }
 
-.main-btn-group-outer {
-
-}
-
 .index-col {
     width: 5%;
 }
@@ -38,4 +34,8 @@ label {
     text-decoration: underline;
     font-weight: bold;
     cursor: pointer;
+}
+
+.tooltip {
+    visibility : auto;
 }

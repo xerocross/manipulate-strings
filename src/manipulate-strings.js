@@ -1,27 +1,18 @@
 let template = require("./manipulate-strings-template").template;
 require("./manipulate-strings-service.js");
 
-let id = 0;
-let Transform = function(previous, description, transformFunction, value) {
-    this.id = id++;
-    this.previous = previous;
-    this.description = description;
-    this.transform = transformFunction;
-    this.toString = ()=> {return this.previous ? this.transform(this.previous.toString()) : value}
-}
-
+let Transform = require("./Transform");
 
 angular.module("manipulateStringsApp", ["manipulateStringsMod"])
 .directive("manipulateStrings", ["manipulateStringsService", function(manipulateStringsService) {
     return {
         template: template,
-        //templateUrl : "/manipulate-strings-template.html",
-        controller : ["$scope", function($scope) {
+        controller : ["$scope", "$element", "$timeout", "$window", function($scope, $element, $timeout, $window) {
             $scope.inputString = "";
             $scope.stringResults = [];
             $scope.replaceSubstring = "";
             $scope.newSubstring = "";
-            $scope.selectedTransform = "alphabetize";
+           
             $scope.transformOptions = [
                 {
                     title: "alphabetize",
@@ -44,6 +35,8 @@ angular.module("manipulateStringsApp", ["manipulateStringsMod"])
                     id : "replaceSubstring"
                 }
             ];
+            $scope.selectedTransform = $scope.transformOptions[0].id;
+
             $scope.inputChange = function(inputString) {
                 let transform = new Transform(null, "init", (x)=>x, inputString);
 
@@ -76,15 +69,34 @@ angular.module("manipulateStringsApp", ["manipulateStringsMod"])
                 $scope.stringResults.push(transform);
             }
             $scope.removeTransform = function(index) {
+                let elts = $($element).find('[data-toggle="tooltip"]');
+                elts.tooltip('dispose');
                 if (index < 1 || index >= $scope.stringResults.length) {
                     throw new Error("index out of bounds");
                 }
-                if (index + 1 < $scope.stringResults.length) {
-                    $scope.stringResults[index + 1].previous = $scope.stringResults[index - 1];
+                if ($window.confirm("Delete this transform?")) {
+                    if (index + 1 < $scope.stringResults.length) {
+                        $scope.stringResults[index + 1].previous = $scope.stringResults[index - 1];
+                    }
+                    $scope.stringResults.splice(index, 1);
                 }
-                $scope.stringResults.splice(index, 1);
             }
+            $scope.$watch("stringResults", function() {
+                $timeout(()=>{
+                    let elts = $($element).find('[data-toggle="tooltip"]');
+                    debugger;
+                    elts.tooltip();
+                }, 0)
+                // this is a hack to queue this action
+                // after the dom has updated
+            }, true);
 
+            
+
+            this.$onInit = function() {
+                $($element).find('[data-toggle="tooltip"]').tooltip()
+            }
+            
         }]
     }
-} ] )
+}])
