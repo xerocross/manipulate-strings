@@ -1186,7 +1186,6 @@ module.exports.getSetInitialValueAction = function (val) {
 },{}],10:[function(require,module,exports){
 const template = `
 <div>
-    <h2>Transform List</h2>
     <table class="result-array-container table">
         <thead>
             <tr>

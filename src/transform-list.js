@@ -1,6 +1,5 @@
 const template = `
 <div>
-    <h2>Transform List</h2>
     <table class="result-array-container table">
         <thead>
             <tr>
