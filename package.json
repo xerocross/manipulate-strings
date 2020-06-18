@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "angular": "^1.7.8",
+    "angular": "^1.8.0",
     "angularjs-tooltips": "^1.0.5",
     "fs": "^0.0.1-security",
     "http-server": "^0.11.1",
